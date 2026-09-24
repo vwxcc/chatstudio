@@ -327,14 +327,16 @@ def init_db() -> None:
             """
         )
 
+        for table in ("requests", "posts"):
+            columns = {row["name"] for row in connection.execute(f"PRAGMA table_info({table})").fetchall()}
+            if "parent_post_id" not in columns:
+                connection.execute(f"ALTER TABLE {table} ADD COLUMN parent_post_id TEXT")
         connection.commit()
 
     finally:
         connection.close()
 
 
-# ============================================================
-# UTILS
 # ============================================================
 
 def now_iso() -> str:
@@ -838,7 +840,8 @@ async def call_provider(
 
 async def ask_ai(
     prompt: str,
-    files: list[dict[str, Any]]
+    files: list[dict[str, Any]],
+    parent_messages: Optional[list[dict[str, str]]] = None
 ) -> dict[str, Any]:
 
     file_context, images = await make_file_context(
@@ -893,16 +896,10 @@ async def ask_ai(
 
         content = content_parts
 
-    messages = [
-        {
-            "role": "system",
-            "content": SYSTEM_PROMPT
-        },
-        {
-            "role": "user",
-            "content": content
-        }
-    ]
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    if parent_messages:
+        messages.extend(parent_messages)
+    messages.append({"role": "user", "content": content})
 
     if not PROVIDERS:
         raise RuntimeError(
@@ -1040,15 +1037,30 @@ async def process_request(
         finally:
             connection.close()
 
-        files = [
-            dict(row)
-            for row in files_rows
-        ]
+        files = [dict(row) for row in files_rows]
 
-        result = await ask_ai(
-            request["prompt"],
-            files
-        )
+        parent_messages: list[dict[str, str]] = []
+        parent_post_id = request["parent_post_id"]
+        if parent_post_id:
+            connection = db()
+            try:
+                chain = []
+                current_id = parent_post_id
+                for _ in range(12):
+                    parent = connection.execute("SELECT id, parent_post_id, prompt, answer FROM posts WHERE id = ?", (current_id,)).fetchone()
+                    if not parent:
+                        break
+                    chain.append(parent)
+                    if not parent["parent_post_id"]:
+                        break
+                    current_id = parent["parent_post_id"]
+                for parent in reversed(chain):
+                    parent_messages.append({"role": "user", "content": parent["prompt"]})
+                    parent_messages.append({"role": "assistant", "content": parent["answer"]})
+            finally:
+                connection.close()
+
+        result = await ask_ai(request["prompt"], files, parent_messages=parent_messages)
 
         post_id = generate_id()
 
@@ -1075,9 +1087,10 @@ async def process_request(
                     model,
                     likes,
                     views,
-                    created_at
+                    created_at,
+                    parent_post_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
                 """,
                 (
                     post_id,
@@ -1087,7 +1100,8 @@ async def process_request(
                     request["prompt"],
                     result["answer"],
                     result["model"],
-                    created_at
+                    created_at,
+                    request["parent_post_id"]
                 )
             )
 
@@ -1385,6 +1399,7 @@ async def create_request(
     name: str = Form(""),
     prompt: str = Form(""),
     files: list[UploadFile] = File(default=[]),
+    parent_post_id: str = Form(""),
     x_session_id: Optional[str] = Header(
         default=None
     )
@@ -1405,6 +1420,16 @@ async def create_request(
         prompt,
         MAX_PROMPT_LENGTH
     )
+
+    parent_post_id = clean_text(parent_post_id, 100)
+    if parent_post_id:
+        connection = db()
+        try:
+            parent_exists = connection.execute("SELECT id FROM posts WHERE id = ?", (parent_post_id,)).fetchone()
+        finally:
+            connection.close()
+        if not parent_exists:
+            raise HTTPException(status_code=400, detail="Исходный пост для продолжения не найден.")
 
     if not name:
         name = "Аноним"
@@ -1641,16 +1666,18 @@ async def create_request(
                 error,
                 post_id,
                 created_at,
-                updated_at
+                updated_at,
+                parent_post_id
             )
-            VALUES (?, ?, ?, 'queued', NULL, NULL, ?, ?)
+            VALUES (?, ?, ?, 'queued', NULL, NULL, ?, ?, ?)
             """,
             (
                 request_id,
                 name,
                 prompt,
                 created_at,
-                created_at
+                created_at,
+                parent_post_id
             )
         )
 
@@ -1847,6 +1874,7 @@ def serialize_post(
         "model": row["model"],
         "likes": row["likes"],
         "views": row["views"],
+        "parent_post_id": row["parent_post_id"],
         "created_at": row["created_at"],
         "files": files,
     }
