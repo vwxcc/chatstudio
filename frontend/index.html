@@ -2067,30 +2067,16 @@ const STORAGE = {
    ============================================================ */
 
 const state = {
-
-    view:
-        "home",
-
-    posts:
-        [],
-
-    search:
-        "",
-
-    selectedFiles:
-        [],
-
-    isSubmitting:
-        false,
-
-    currentPost:
-        null,
-
-    polling:
-        false,
-
-    cooldownTimer:
-        null
+    view: "home",
+    posts: [],
+    search: "",
+    sort: "recommended",
+    selectedFiles: [],
+    isSubmitting: false,
+    currentPost: null,
+    parentPostId: null,
+    polling: false,
+    cooldownTimer: null
 };
 
 
@@ -2692,85 +2678,22 @@ async function loadPosts() {
    ============================================================ */
 
 function normalizePost(raw) {
-
-    const post =
-        raw || {};
-
-    let files =
-        post.files ||
-        post.attachments ||
-        [];
-
-    if (!Array.isArray(files)) {
-        files = [];
-    }
-
+    const post = raw || {};
+    let files = post.files || post.attachments || [];
+    if (!Array.isArray(files)) files = [];
     return {
-
-        id:
-            post.id ??
-            post.post_id,
-
-        title:
-            post.title ||
-            post.name ||
-            createTitle(
-                post.prompt ||
-                post.request ||
-                ""
-            ),
-
-        author:
-            post.author_name ||
-            post.author ||
-            post.name ||
-            "Аноним",
-
-        prompt:
-            post.prompt ||
-            post.request ||
-            post.text ||
-            "",
-
-        answer:
-            post.answer ||
-            post.response ||
-            post.ai_answer ||
-            "",
-
-        files,
-
-        likes:
-            Number(
-                post.likes ??
-                post.like_count ??
-                0
-            ),
-
-        views:
-            Number(
-                post.views ??
-                post.view_count ??
-                0
-            ),
-
-        dislikes:
-            Number(
-                post.dislikes ??
-                post.dislike_count ??
-                0
-            ),
-
-        model:
-            post.model ||
-            post.model_name ||
-            "ИИ",
-
-        created_at:
-            post.created_at ||
-            post.createdAt ||
-            post.date ||
-            null
+        id: post.id ?? post.post_id,
+        title: post.title || post.name || createTitle(post.prompt || post.request || ""),
+        author: post.author_name || post.author || post.name || "Аноним",
+        prompt: post.prompt || post.request || post.text || "",
+        answer: post.answer || post.response || post.ai_answer || "",
+        files: files,
+        likes: Number(post.likes ?? post.like_count ?? 0),
+        views: Number(post.views ?? post.view_count ?? 0),
+        dislikes: Number(post.dislikes ?? post.dislike_count ?? 0),
+        model: post.model || post.model_name || "ИИ",
+        created_at: post.created_at || post.createdAt || post.date || null,
+        parent_post_id: post.parent_post_id || null
     };
 }
 
@@ -2797,45 +2720,36 @@ function createTitle(text) {
    ============================================================ */
 
 function getFilteredPosts() {
+    const query = state.search.trim().toLowerCase();
+    let posts = state.posts.map(normalizePost);
 
-    const query =
-        state.search
-            .trim()
-            .toLowerCase();
-
-    const normalized =
-        state.posts.map(
-            normalizePost
-        );
-
-    if (!query) {
-        return normalized;
+    if (query) {
+        posts = posts.filter(post => {
+            const haystack = [
+                post.title, post.author, post.prompt, post.answer,
+                ...post.files.map(file => getFileName(file))
+            ].join(" ").toLowerCase();
+            return haystack.includes(query);
+        });
     }
 
-    return normalized.filter(
-        post => {
+    if (state.sort === "top") {
+        posts.sort((a, b) => (b.likes * 10 + b.views) - (a.likes * 10 + a.views));
+    } else if (state.sort === "new") {
+        posts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    } else if (state.sort === "old") {
+        posts.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+    } else {
+        posts.sort((a, b) => {
+            const score = post => {
+                const age = Math.max(0, (Date.now() - new Date(post.created_at || Date.now()).getTime()) / 86400000);
+                return Math.log1p(post.likes * 3 + post.views) * 2 + 1 / (1 + age) + Math.random() * 0.35;
+            };
+            return score(b) - score(a);
+        });
+    }
 
-            const haystack = [
-                post.title,
-                post.author,
-                post.prompt,
-                post.answer,
-
-                ...post.files.map(
-                    file =>
-                        file.name ||
-                        file.filename ||
-                        ""
-                )
-            ]
-                .join(" ")
-                .toLowerCase();
-
-            return haystack.includes(
-                query
-            );
-        }
-    );
+    return posts;
 }
 
 
@@ -2844,72 +2758,38 @@ function getFilteredPosts() {
    ============================================================ */
 
 function renderFeed() {
+    const header = document.querySelector(".feed-header");
+    if (header && !document.getElementById("feedTools")) {
+        const tools = document.createElement("div");
+        tools.id = "feedTools";
+        tools.className = "feed-tools";
+        tools.innerHTML = '<select class="feed-sort" id="feedSort" aria-label="Сортировка"><option value="recommended">Рекомендации</option><option value="top">Популярные</option><option value="new">Новые</option><option value="old">Старые</option></select>';
+        header.parentNode.insertBefore(tools, feed);
+        const select = document.getElementById("feedSort");
+        select.value = state.sort;
+        select.addEventListener("change", event => { state.sort = event.target.value; renderFeed(); });
+    }
 
-    const posts =
-        getFilteredPosts();
-
-    feedCount.textContent =
-        `${posts.length} ${
-            pluralize(
-                posts.length,
-                "пост",
-                "поста",
-                "постов"
-            )
-        }`;
+    const posts = getFilteredPosts();
+    feedCount.textContent = `${posts.length} ${pluralize(posts.length, "пост", "поста", "постов")}`;
 
     if (!posts.length) {
-
-        feed.innerHTML = `
-            <div class="empty">
-
-                <div class="empty-title">
-                    ${
-                        state.search
-                            ? "Ничего не найдено"
-                            : "Пока нет постов"
-                    }
-                </div>
-
-                <div class="empty-text">
-                    ${
-                        state.search
-                            ? "Попробуйте изменить поисковый запрос."
-                            : "Создайте первый запрос к ИИ."
-                    }
-                </div>
-
-            </div>
-        `;
-
+        feed.innerHTML = `<div class="empty"><div class="empty-title">${state.search ? "Ничего не найдено" : "Пока нет постов"}</div><div class="empty-text">${state.search ? "Попробуйте изменить поисковый запрос." : "Создайте первый запрос к ИИ."}</div></div>`;
         return;
     }
 
-    feed.innerHTML =
-        posts
-            .map(
-                renderPostCard
-            )
-            .join("");
+    feed.innerHTML = posts.map(renderPostCard).join("");
 
-    feed
-        .querySelectorAll(
-            "[data-post-id]"
-        )
-        .forEach(
-            card => {
-
-                card.addEventListener(
-                    "click",
-                    () => {
-
-                        openPost(
-                            card.dataset.postId
-                        );
-                    }
-                );
-            }
-        );
+    feed.querySelectorAll("[data-post-id]").forEach(card => {
+        card.addEventListener("click", () => openPost(card.dataset.postId));
+    });
+    feed.querySelectorAll("[data-feed-like]").forEach(button => {
+        button.addEventListener("click", event => { event.stopPropagation(); likePost(button.dataset.feedLike); });
+    });
+    feed.querySelectorAll("[data-feed-continue]").forEach(button => {
+        button.addEventListener("click", event => { event.stopPropagation(); continueDialog(button.dataset.feedContinue); });
+    });
+    typesetMath(feed);
 }
 
 
@@ -2950,136 +2830,30 @@ function pluralize(
    ============================================================ */
 
 function renderPostCard(post) {
+    const files = post.files || [];
+    const fileHtml = files.length ? `<div class="post-files">${files.slice(0, 8).map((file, index) => renderSmallFile(file, index, files.length)).join("")}</div>` : "";
+    const liked = hasReacted(STORAGE.likedPrefix, post.id);
 
-    const files =
-        post.files || [];
-
-    const fileHtml =
-        files.length
-            ? `
-                <div class="post-files">
-                    ${
-                        files
-                            .slice(0, 8)
-                            .map(
-                                (
-                                    file,
-                                    index
-                                ) =>
-                                    renderSmallFile(
-                                        file,
-                                        index,
-                                        files.length
-                                    )
-                            )
-                            .join("")
-                    }
-                </div>
-            `
-            : "";
-
-    return `
-        <article
-            class="post-card"
-            data-post-id="${escapeHtml(post.id)}"
-        >
-
-            <div class="post-top">
-
-                <div class="post-author">
-
-                    <div class="avatar">
-                        ${escapeHtml(
-                            getInitial(
-                                post.author
-                            )
-                        )}
-                    </div>
-
-                    <div>
-
-                        <div class="author-name">
-                            ${escapeHtml(
-                                post.author
-                            )}
-                        </div>
-
-                        <div class="post-date">
-                            ${escapeHtml(
-                                formatDate(
-                                    post.created_at
-                                )
-                            )}
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="post-model">
-                    ${escapeHtml(
-                        post.model
-                    )}
-                </div>
-
+    return `<article class="post-card" data-post-id="${escapeHtml(post.id)}">
+        <div class="post-top">
+            <div class="post-author">
+                <div class="avatar">${escapeHtml(getInitial(post.author))}</div>
+                <div><div class="author-name">${escapeHtml(post.author)}</div><div class="post-date">${escapeHtml(formatDate(post.created_at))}</div></div>
             </div>
-
-
-            <h3 class="post-title">
-                ${escapeHtml(
-                    post.title
-                )}
-            </h3>
-
-
-            ${
-                post.prompt
-                    ? `
-                        <div class="post-request">
-                            ${escapeHtml(
-                                post.prompt
-                            )}
-                        </div>
-                    `
-                    : ""
-            }
-
-
-            ${fileHtml}
-
-
-            ${
-                post.answer
-                    ? `
-                        <div class="post-answer">
-                            ${escapeHtml(
-                                post.answer
-                            )}
-                        </div>
-                    `
-                    : ""
-            }
-
-
-            <div class="post-bottom">
-
-                <span class="stat stat-like">
-                    ♡ ${post.likes}
-                </span>
-
-                <span class="stat">
-                    ◉ ${post.views}
-                </span>
-
-                <span class="stat">
-                    открыть →
-                </span>
-
-            </div>
-
-        </article>
-    `;
+            <div class="post-model">${escapeHtml(post.model)}</div>
+        </div>
+        <h3 class="post-title">${escapeHtml(post.title)}</h3>
+        ${post.parent_post_id ? '<div class="context-badge">Продолжение диалога</div>' : ""}
+        ${post.prompt ? `<div class="post-request">${escapeHtml(post.prompt)}</div>` : ""}
+        ${fileHtml}
+        ${post.answer ? `<div class="post-answer">${renderAnswer(post.answer)}</div>` : ""}
+        <div class="post-bottom">
+            <button type="button" class="feed-action feed-like ${liked ? "active" : ""}" data-feed-like="${escapeHtml(post.id)}">${liked ? "♥" : "♡"} ${post.likes}</button>
+            <span class="stat">◉ ${post.views}</span>
+            <button type="button" class="feed-action feed-continue" data-feed-continue="${escapeHtml(post.id)}">↩ Продолжить</button>
+            <span class="stat post-continue">открыть →</span>
+        </div>
+    </article>`;
 }
 
 
@@ -3398,226 +3172,167 @@ async function openPost(id) {
     }
 }
 
+function renderAnswer(text) {
+    const source = String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+    if (!source) return "";
+
+    const lines = source.split("\n");
+    const out = [];
+    let paragraph = [];
+    let list = null;
+    let code = false;
+    let codeLines = [];
+
+    const flush = () => {
+        if (!paragraph.length) return;
+        out.push("<p>" + inlineMarkdown(paragraph.join("\n")) + "</p>");
+        paragraph = [];
+    };
+    const closeList = () => {
+        if (list) { out.push("</" + list + ">"); list = null; }
+    };
+
+    for (const line of lines) {
+        if (line.trim().slice(0, 3) === "```") {
+            flush(); closeList();
+            if (code) { out.push("<pre><code>" + escapeHtml(codeLines.join("\n")) + "</code></pre>"); codeLines = []; }
+            code = !code;
+            continue;
+        }
+        if (code) { codeLines.push(line); continue; }
+        if (!line.trim()) { flush(); closeList(); continue; }
+
+        let m = line.match(/^\s*(#{1,3})\s+(.+)$/);
+        if (m) { flush(); closeList(); const n = m[1].length; out.push("<h" + n + ">" + inlineMarkdown(m[2]) + "</h" + n + ">"); continue; }
+
+        m = line.match(/^\s*[-*•]\s+(.+)$/);
+        if (m) { flush(); if (list !== "ul") { closeList(); out.push("<ul>"); list = "ul"; } out.push("<li>" + inlineMarkdown(m[1]) + "</li>"); continue; }
+
+        m = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        if (m) { flush(); if (list !== "ol") { closeList(); out.push("<ol>"); list = "ol"; } out.push("<li>" + inlineMarkdown(m[1]) + "</li>"); continue; }
+
+        if (/^\s*>\s?/.test(line)) { flush(); closeList(); out.push("<blockquote>" + inlineMarkdown(line.replace(/^\s*>\s?/, "")) + "</blockquote>"); continue; }
+
+        closeList();
+        paragraph.push(line);
+    }
+
+    flush(); closeList();
+    if (code) out.push("<pre><code>" + escapeHtml(codeLines.join("\n")) + "</code></pre>");
+    return out.join("");
+}
+
+
+function inlineMarkdown(text) {
+    let value = escapeHtml(text);
+    const math = [];
+    const saveMath = value => { const marker = "%%MATH" + math.length + "%%"; math.push(value); return marker; };
+    value = value.replace(/\$\$[\s\S]+?\$\$/g, saveMath);
+    value = value.replace(/\\\[[\s\S]+?\\\]/g, saveMath);
+    value = value.replace(/\\\([\s\S]+?\\\)/g, saveMath);
+    value = value.replace(/\$[^$\n]+?\$/g, saveMath);
+    value = value.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+    value = value.replace(/__([^_\n]+)__/g, "<strong>$1</strong>");
+    value = value.replace(/~~([^~\n]+)~~/g, "<del>$1</del>");
+    value = value.replace(/%%MATH(\d+)%%/g, (_, i) => math[Number(i)]);
+    return value.replace(/\n/g, "<br>");
+}
+
+
+function typesetMath(element) {
+    if (!element || !window.renderMathInElement) return;
+    try {
+        window.renderMathInElement(element, {
+            delimiters: [
+                {left: "$", right: "$", display: true},
+                {left: "\\[", right: "\\]", display: true},
+                {left: "\\(", right: "\\)", display: false},
+                {left: "$", right: "$", display: false}
+            ],
+            throwOnError: false,
+            strict: false
+        });
+    } catch (_) {}
+}
+
+
+function loadKaTeX() {
+    if (window.renderMathInElement) return;
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css";
+    document.head.appendChild(css);
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js";
+    script.onload = () => {
+        const auto = document.createElement("script");
+        auto.src = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js";
+        auto.onload = () => { if (state.view === "home") renderFeed(); else if (state.currentPost) renderFullPost(state.currentPost); };
+        document.head.appendChild(auto);
+    };
+    document.head.appendChild(script);
+}
+
+
+function injectFrontendStyles() {
+    const style = document.createElement("style");
+    style.textContent =
+        ".feed-tools{display:flex;gap:8px;align-items:center;margin:0 0 14px}" +
+        ".feed-sort{height:36px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:12px;font-weight:600}" +
+        ".feed-action{height:34px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text-soft);padding:0 10px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;cursor:pointer}" +
+        ".feed-action:hover{background:#f0ebe3;border-color:var(--border-dark)}" +
+        ".feed-action.active{background:#e9e2d9;border-color:#bdb3a6}" +
+        ".answer-content{white-space:normal;overflow-wrap:anywhere}" +
+        ".answer-content p{margin:0 0 13px}.answer-content p:last-child{margin-bottom:0}" +
+        ".answer-content h1,.answer-content h2,.answer-content h3{margin:22px 0 10px;line-height:1.25}" +
+        ".answer-content ul,.answer-content ol{margin:8px 0 14px;padding-left:25px}.answer-content li{margin:4px 0}" +
+        ".answer-content blockquote{margin:12px 0;padding:9px 14px;border-left:3px solid var(--border-dark);color:var(--text-soft);background:var(--card-soft)}" +
+        ".answer-content pre{margin:14px 0;padding:14px;overflow:auto;background:#f1ece4;border:1px solid var(--border);border-radius:10px}" +
+        ".answer-content .katex-display{overflow-x:auto;padding:5px 0}" +
+        ".continue-dialog-button{height:40px;border:1px solid var(--border-dark);border-radius:11px;background:var(--accent);color:#fff;padding:0 14px;font-size:13px;font-weight:650}" +
+        ".continue-dialog-button:hover{background:var(--accent-hover)}" +
+        ".context-badge{margin-top:8px;color:var(--muted);font-size:11px}" +
+        ".post-bottom{flex-wrap:wrap}" +
+        "@media(max-width:700px){.feed-tools{width:100%}.feed-sort{width:100%}.continue-dialog-button{width:100%}}";
+    document.head.appendChild(style);
+}
+
+
 /* ============================================================
    FULL POST
    ============================================================ */
 
 function renderFullPost(post) {
+    const files = post.files || [];
+    const filesHtml = files.length ? `<div class="full-files"><div class="content-label">Файлы · ${files.length}</div><div class="full-file-grid">${files.map(renderFullFile).join("")}</div></div>` : "";
+    const liked = hasReacted(STORAGE.likedPrefix, post.id);
+    const disliked = hasReacted(STORAGE.dislikedPrefix, post.id);
 
-    const files =
-        post.files || [];
-
-    const filesHtml =
-        files.length
-            ? `
-                <div class="full-files">
-
-                    <div class="content-label">
-                        Файлы · ${files.length}
-                    </div>
-
-                    <div class="full-file-grid">
-
-                        ${
-                            files
-                                .map(
-                                    renderFullFile
-                                )
-                                .join("")
-                        }
-
-                    </div>
-
-                </div>
-            `
-            : "";
-
-
-    fullPostContainer.innerHTML = `
-
-        <article class="full-post">
-
-            <div class="full-post-meta">
-
-                <div class="full-author">
-
-                    <div class="full-avatar">
-                        ${escapeHtml(
-                            getInitial(
-                                post.author
-                            )
-                        )}
-                    </div>
-
-                    <div>
-
-                        <div class="full-author-name">
-                            ${escapeHtml(
-                                post.author
-                            )}
-                        </div>
-
-                        <div class="full-date">
-                            ${escapeHtml(
-                                formatDate(
-                                    post.created_at
-                                )
-                            )}
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="full-model">
-                    Модель: ${escapeHtml(
-                        post.model
-                    )}
-                </div>
-
+    fullPostContainer.innerHTML = `<article class="full-post">
+        <div class="full-post-meta">
+            <div class="full-author">
+                <div class="full-avatar">${escapeHtml(getInitial(post.author))}</div>
+                <div><div class="full-author-name">${escapeHtml(post.author)}</div><div class="full-date">${escapeHtml(formatDate(post.created_at))}</div></div>
             </div>
+            <div class="full-model">Модель: ${escapeHtml(post.model)}</div>
+        </div>
+        <h1 class="full-title">${escapeHtml(post.title)}</h1>
+        ${post.parent_post_id ? '<div class="context-badge">Это продолжение предыдущего диалога</div>' : ""}
+        ${post.prompt ? `<div><div class="content-label">Запрос</div><div class="full-request">${escapeHtml(post.prompt)}</div></div>` : ""}
+        ${filesHtml}
+        ${post.answer ? `<div class="full-answer"><div class="content-label">Ответ ИИ</div><div class="answer-content">${renderAnswer(post.answer)}</div></div>` : ""}
+        <div class="full-post-footer" id="postReactions">
+            <button class="reaction-button ${liked ? "active" : ""}" id="likeButton" type="button">${liked ? "♥" : "♡"} <span id="likeCount">${post.likes}</span></button>
+            <button class="reaction-button ${disliked ? "active" : ""}" id="dislikeButton" type="button">👎</button>
+            <button class="continue-dialog-button" id="continueDialogButton" type="button">↩ Продолжить диалог</button>
+            <div class="view-stat">◉ ${post.views} просмотров</div>
+        </div>
+    </article>`;
 
-
-            <h1 class="full-title">
-                ${escapeHtml(
-                    post.title
-                )}
-            </h1>
-
-
-            ${
-                post.prompt
-                    ? `
-                        <div>
-
-                            <div class="content-label">
-                                Запрос
-                            </div>
-
-                            <div class="full-request">
-                                ${escapeHtml(
-                                    post.prompt
-                                )}
-                            </div>
-
-                        </div>
-                    `
-                    : ""
-            }
-
-
-            ${filesHtml}
-
-
-            ${
-                post.answer
-                    ? `
-                        <div class="full-answer">
-
-                            <div class="content-label">
-                                Ответ ИИ
-                            </div>
-
-                            <div class="answer-content">
-                                ${escapeHtml(
-                                    post.answer
-                                )}
-                            </div>
-
-                        </div>
-                    `
-                    : ""
-            }
-
-
-            <div
-                class="full-post-footer"
-                id="postReactions"
-            >
-
-                <button
-                    class="reaction-button"
-                    id="likeButton"
-                    type="button"
-                >
-                    ♡
-                    <span id="likeCount">
-                        ${post.likes}
-                    </span>
-                </button>
-
-
-                <button
-                    class="reaction-button"
-                    id="dislikeButton"
-                    type="button"
-                >
-                    👎
-                </button>
-
-
-                <div class="view-stat">
-                    ◉ ${post.views} просмотров
-                </div>
-
-            </div>
-
-        </article>
-    `;
-
-
-    const likeButton =
-        document.getElementById(
-            "likeButton"
-        );
-
-    const dislikeButton =
-        document.getElementById(
-            "dislikeButton"
-        );
-
-
-    if (
-        hasReacted(
-            STORAGE.likedPrefix,
-            post.id
-        )
-    ) {
-        likeButton.classList.add(
-            "active"
-        );
-    }
-
-
-    if (
-        hasReacted(
-            STORAGE.dislikedPrefix,
-            post.id
-        )
-    ) {
-        dislikeButton.classList.add(
-            "active"
-        );
-    }
-
-
-    likeButton.addEventListener(
-        "click",
-        () =>
-            likePost(
-                post.id
-            )
-    );
-
-
-    dislikeButton.addEventListener(
-        "click",
-        () =>
-            dislikePost(
-                post.id
-            )
-    );
+    document.getElementById("likeButton").addEventListener("click", () => likePost(post.id));
+    document.getElementById("dislikeButton").addEventListener("click", () => dislikePost(post.id));
+    document.getElementById("continueDialogButton").addEventListener("click", () => continueDialog(post.id));
+    typesetMath(fullPostContainer);
 }
 
 
@@ -3919,6 +3634,34 @@ async function dislikePost(id) {
 }
 
 
+async function continueDialog(postId) {
+    let post = state.currentPost && String(state.currentPost.id) === String(postId) ? state.currentPost : null;
+
+    if (!post) {
+        try {
+            const response = await fetch(API.post(postId), { headers: {"X-Session-ID": getSessionId()}, cache: "no-store" });
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(data.message || data.error || "Не удалось загрузить исходный пост.");
+            post = normalizePost(data.post || data);
+        } catch (error) {
+            showToast(error.message || "Не удалось продолжить диалог.");
+            return;
+        }
+    }
+
+    state.parentPostId = post.id;
+    state.selectedFiles = [];
+    nameInput.value = post.author || "";
+    promptInput.value = "";
+    fileInput.value = "";
+    processing.classList.remove("visible");
+    hideError();
+    renderFiles();
+    updatePromptCounter();
+    showView("new");
+}
+
+
 /* ============================================================
    REACTION STORAGE
    ============================================================ */
@@ -3971,35 +3714,16 @@ function markReacted(
    ============================================================ */
 
 function resetNewRequest() {
-
-    if (
-        state.isSubmitting
-    ) {
-        return;
-    }
-
-    state.selectedFiles =
-        [];
-
-    nameInput.value =
-        "";
-
-    promptInput.value =
-        "";
-
-    fileInput.value =
-        "";
-
-    processing.classList.remove(
-        "visible"
-    );
-
+    if (state.isSubmitting) return;
+    state.parentPostId = null;
+    state.selectedFiles = [];
+    nameInput.value = "";
+    promptInput.value = "";
+    fileInput.value = "";
+    processing.classList.remove("visible");
     hideError();
-
     renderFiles();
-
     updatePromptCounter();
-
     updateCooldownUI();
 }
 
@@ -4689,12 +4413,17 @@ async function submitRequest() {
 
 
     formData.append(
-        "prompt",
-        prompt
+    "prompt",
+    prompt
+);
+
+if (state.parentPostId) {
+    formData.append(
+        "parent_post_id",
+        state.parentPostId
     );
-
-
-    state.selectedFiles.forEach(
+}
+state.selectedFiles.forEach(
         file => {
 
             formData.append(
@@ -5215,6 +4944,9 @@ window.addEventListener(
    ============================================================ */
 
 getSessionId();
+
+injectFrontendStyles();
+loadKaTeX();
 
 updatePromptCounter();
 
