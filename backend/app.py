@@ -262,6 +262,29 @@ def init_db() -> None:
                     ON DELETE SET NULL
             );
 
+            CREATE TABLE IF NOT EXISTS request_files (
+                id TEXT PRIMARY KEY,
+                request_id TEXT NOT NULL,
+                original_name TEXT NOT NULL,
+                stored_name TEXT NOT NULL,
+                mime_type TEXT NOT NULL,
+                size_bytes INTEGER NOT NULL,
+                path TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+
+                FOREIGN KEY(request_id)
+                    REFERENCES requests(id)
+                    ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_request_files_request
+                ON request_files(request_id);
+
+            CREATE TABLE IF NOT EXISTS request_sessions (
+                request_id TEXT PRIMARY KEY,
+                session_id TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS post_files (
                 id TEXT PRIMARY KEY,
                 post_id TEXT NOT NULL,
