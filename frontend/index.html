@@ -1,38 +1,5064 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ChatStudio</title><style>
-:root{--bg:#f5f1ea;--card:#fffdf9;--soft:#faf7f1;--text:#25231f;--muted:#817a70;--line:#ddd6cb;--dark:#25231f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}.top{height:68px;position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:0 28px;background:#f5f1eae8;backdrop-filter:blur(15px);border-bottom:1px solid #786e6226}.brand{text-decoration:none;font-weight:750;display:flex;gap:9px;align-items:center}.mark{width:32px;height:32px;border-radius:10px;background:#25231f;color:#fff;display:grid;place-items:center}.actions{display:flex;gap:8px}.btn,.select{height:40px;padding:0 13px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--text);font-size:13px;font-weight:650}.primary{background:var(--dark);color:#fff;border-color:var(--dark)}main{width:min(1080px,calc(100% - 32px));margin:auto}.view{padding:42px 0 80px}.hero{text-align:center;padding:20px 0 30px}.hero h1{font-size:clamp(36px,6vw,60px);line-height:1;letter-spacing:-2.5px;margin:0}.hero p{max-width:650px;margin:16px auto;color:var(--muted);line-height:1.6}.search{display:block;width:min(760px,100%);height:52px;margin:8px auto 25px;padding:0 17px;border:1px solid var(--line);border-radius:15px;background:var(--card);outline:0}.feedhead,.chathead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.feedhead h2,.chathead h1{margin:0}.feedtools{display:flex;align-items:center;gap:8px}.feed{display:flex;flex-direction:column;gap:13px}.card,.composer,.turn{background:var(--card);border:1px solid var(--line);border-radius:19px;box-shadow:0 10px 40px #362f260f}.card{padding:19px;cursor:pointer}.card:hover{transform:translateY(-1px)}.meta{display:flex;justify-content:space-between;gap:10px}.author{display:flex;align-items:center;gap:9px}.avatar{width:35px;height:35px;border-radius:50%;background:#e8e1d8;display:grid;place-items:center;font-weight:750}.muted{color:var(--muted);font-size:11px}.model,.badge{border:1px solid var(--line);border-radius:8px;padding:5px 8px;color:var(--muted);font-size:11px;height:max-content}.title{font-size:19px;font-weight:650;margin:16px 0 7px}.req{font-size:14px;color:#555047;line-height:1.6;white-space:pre-wrap;max-height:68px;overflow:hidden}.badge{display:inline-block;background:#eee9e1;border:0;margin:5px 0 7px}.preview{margin-top:14px;padding:13px 14px;border-radius:12px;background:var(--soft);font-size:13px;line-height:1.55;max-height:110px;overflow:hidden}.bottom{display:flex;align-items:center;gap:12px;margin-top:14px;color:var(--muted);font-size:12px}.action{border:0;background:transparent;color:inherit;padding:4px 5px;border-radius:8px}.action:hover{background:#eee9e1}.continue{margin-left:auto}.empty{text-align:center;padding:60px 20px;border:1px dashed #c8bfb3;border-radius:18px;color:var(--muted)}.section{padding:22px 25px}.section+.section{border-top:1px solid var(--line)}.label{font-size:12px;font-weight:700;color:#625d55;margin-bottom:9px}.name,.prompt{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--soft);outline:0;color:var(--text)}.name{height:46px;padding:0 13px}.prompt{min-height:210px;padding:14px;resize:vertical;line-height:1.65}.drop{border:1.5px dashed #c8bfb3;border-radius:15px;padding:26px;text-align:center;background:var(--soft)}.drop input{display:none}.files{display:grid;gap:8px;margin-top:10px}.file{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:9px}.fileinfo{flex:1;min-width:0}.filename{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.remove{border:0;background:transparent;font-size:18px}.footer{display:flex;justify-content:space-between;align-items:center;padding:16px 25px;border-top:1px solid var(--line)}.error{margin:0 25px 15px;padding:11px 13px;border-radius:11px;background:#f8e8e6;color:#873f39;font-size:13px}.processing{text-align:center;padding:42px}.spin{width:28px;height:28px;border:3px solid #ddd6cb;border-top-color:#25231f;border-radius:50%;margin:auto;animation:s .8s linear infinite}@keyframes s{to{transform:rotate(360deg)}}.status{margin-top:12px;color:var(--muted)}.chat{display:flex;flex-direction:column;gap:12px}.turn{padding:18px}.user{background:#eee9e1}.turnlabel{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:9px;text-transform:uppercase}.content{font-size:15px;line-height:1.7;white-space:pre-wrap}.answer{white-space:normal}.answer p{margin:.55em 0}.answer h1,.answer h2,.answer h3{margin:.9em 0 .4em}.answer ul,.answer ol{padding-left:24px}.answer blockquote{border-left:3px solid #c8bfb3;padding-left:12px;color:#625d55}.answer pre{background:#292722;color:#fff;padding:13px;border-radius:10px;overflow:auto}.answer code{font-family:ui-monospace,Consolas,monospace}.answer :not(pre)>code{background:#eee9e1;padding:2px 5px;border-radius:5px}.turnactions{display:flex;gap:8px;margin-top:12px}.filelink{display:inline-block;margin:10px 6px 0 0;padding:7px 9px;border:1px solid var(--line);border-radius:8px;text-decoration:none;font-size:12px}.toast{position:fixed;right:18px;bottom:18px;padding:12px 15px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 40px #362f2615}.@media(max-width:700px){.top{padding:0 14px}main{width:calc(100% - 20px)}.section,.footer{padding-left:18px;padding-right:18px}.chathead{flex-wrap:wrap}.model{display:none}}
-</style></head><body>
-<header class="top"><a href="/" class="brand" id="brand"><span class="mark">C</span>ChatStudio</a><div class="actions"><button class="btn" id="home">Главная</button><button class="btn primary" id="new">Новый запрос</button></div></header>
-<main><section id="homeView" class="view"><div class="hero"><h1>ChatStudio</h1><p>Публичная лента ответов ИИ и полноценные диалоги. Продолжение любого ответа открывает единую историю чата.</p></div><input id="search" class="search" placeholder="Поиск по запросам, ответам и авторам…"><div class="feedhead"><h2>Лента</h2><div class="feedtools"><select id="sort" class="select"><option value="recommended">Рекомендации</option><option value="top">Популярные</option><option value="new">Новые</option><option value="old">Старые</option><option value="random">Случайные</option></select><span id="count" class="muted"></span></div></div><div id="feed" class="feed"></div></section>
-<section id="newView" class="view hidden"><div class="chathead"><h1 id="composerTitle">Новый запрос</h1><button class="btn" id="cancel">Назад</button></div><div id="context" class="badge hidden">Продолжение диалога · весь предыдущий контекст будет передан ИИ</div><div class="composer"><div class="section"><div class="label">Имя <span class="muted">(необязательно)</span></div><input id="name" class="name" maxlength="80" placeholder="Как вас назвать?"></div><div class="section"><div class="label">Запрос</div><textarea id="prompt" class="prompt" maxlength="50000" placeholder="Напишите, что нужно сделать…"></textarea><div id="counter" class="muted" style="text-align:right;margin-top:5px">0 / 50 000</div></div><div class="section"><div class="drop" id="drop">📎<br><b>Прикрепить файлы</b><div class="muted" style="margin:6px 0 12px">до 20 файлов · 20 МБ каждый · 50 МБ всего</div><button class="btn" id="choose" type="button">Выбрать</button><input id="fileInput" type="file" multiple></div><div id="fileList" class="files"></div></div><div id="error" class="error hidden"></div><div class="footer"><span id="cooldown" class="muted"></span><button id="send" class="btn primary">Отправить</button></div></div><div id="processing" class="processing hidden"><div class="spin"></div><div id="status" class="status">Обработка…</div></div></section>
-<section id="chatView" class="view hidden"><div class="chathead"><button class="btn" id="back">← Назад</button><h1 id="chatTitle">Чат</h1><button class="btn primary" id="continue">Продолжить диалог</button></div><div id="chat" class="chat"></div></section></main><div id="toast" class="toast hidden"></div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ChatStudio</title>
+
+    <style>
+        :root {
+            --bg: #f5f1ea;
+            --bg-soft: #eee9e1;
+            --card: #fffdf9;
+            --card-soft: #faf7f1;
+
+            --text: #25231f;
+            --text-soft: #555047;
+            --muted: #817a70;
+
+            --border: #ddd6cb;
+            --border-dark: #c8bfb3;
+
+            --accent: #25231f;
+            --accent-hover: #3a3732;
+
+            --danger: #b44d45;
+            --danger-bg: #f8e8e6;
+
+            --success: #47745a;
+
+            --shadow:
+                0 10px 40px rgba(54, 47, 38, 0.07);
+
+            --shadow-hover:
+                0 16px 45px rgba(54, 47, 38, 0.11);
+
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+
+            font-family:
+                Inter,
+                ui-sans-serif,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        button,
+        input,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .topbar {
+            height: 72px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 28px;
+
+            position: sticky;
+            top: 0;
+            z-index: 100;
+
+            background:
+                rgba(245, 241, 234, 0.88);
+
+            backdrop-filter: blur(15px);
+
+            border-bottom:
+                1px solid rgba(120, 110, 98, 0.15);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            text-decoration: none;
+
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 10px;
+
+            background: var(--accent);
+            color: white;
+
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .header-button {
+            height: 40px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 11px;
+
+            background:
+                rgba(255, 253, 249, 0.8);
+
+            color: var(--text);
+
+            padding: 0 14px;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            transition: 0.18s ease;
+        }
+
+        .header-button:hover {
+            background: var(--card);
+            border-color: var(--border-dark);
+        }
+
+        /* =====================================================
+           APP
+        ===================================================== */
+
+        .app {
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        /* =====================================================
+           HOME
+        ===================================================== */
+
+        .home {
+            padding: 50px 0 80px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 20px 0 34px;
+        }
+
+        .hero h1 {
+            margin: 0;
+
+            font-size:
+                clamp(34px, 6vw, 58px);
+
+            line-height: 1.03;
+
+            letter-spacing: -2.5px;
+
+            font-weight: 680;
+        }
+
+        .hero p {
+            max-width: 620px;
+
+            margin: 17px auto 0;
+
+            color: var(--muted);
+
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .new-button {
+            margin-top: 25px;
+
+            min-height: 48px;
+
+            border: 0;
+            border-radius: 13px;
+
+            background: var(--accent);
+            color: white;
+
+            padding: 0 21px;
+
+            font-size: 14px;
+            font-weight: 650;
+
+            transition: 0.18s ease;
+        }
+
+        .new-button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        /* =====================================================
+           SEARCH
+        ===================================================== */
+
+        .search-wrap {
+            margin: 10px auto 30px;
+
+            max-width: 760px;
+
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+
+            left: 16px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: #938b80;
+
+            font-size: 18px;
+
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 52px;
+
+            padding:
+                0 18px 0 45px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 15px;
+
+            outline: none;
+
+            background:
+                rgba(255, 253, 249, 0.78);
+
+            color: var(--text);
+
+            font-size: 14px;
+
+            transition: 0.18s ease;
+        }
+
+        .search-input::placeholder {
+            color: #aaa39a;
+        }
+
+        .search-input:focus {
+            background: var(--card);
+
+            border-color:
+                #aaa196;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(80, 73, 64, 0.06);
+        }
+
+        /* =====================================================
+           FEED
+        ===================================================== */
+
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 14px;
+        }
+
+        .feed-title {
+            margin: 0;
+
+            font-size: 16px;
+            font-weight: 680;
+        }
+
+        .feed-count {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .post-card {
+            background: var(--card);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 19px;
+
+            box-shadow: var(--shadow);
+
+            padding: 20px;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.18s ease,
+                box-shadow 0.18s ease,
+                border-color 0.18s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                var(--shadow-hover);
+
+            border-color:
+                var(--border-dark);
+        }
+
+        .post-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            gap: 15px;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            min-width: 0;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+
+            flex: 0 0 36px;
+
+            border-radius: 50%;
+
+            background: #e8e1d8;
+
+            display: grid;
+            place-items: center;
+
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .author-name {
+            font-size: 13px;
+            font-weight: 650;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .post-date {
+            color: var(--muted);
+            font-size: 11px;
+
+            margin-top: 3px;
+        }
+
+        .post-model {
+            color: var(--muted);
+            font-size: 11px;
+
+            border:
+                1px solid var(--border);
+
+            padding: 5px 8px;
+
+            border-radius: 8px;
+
+            white-space: nowrap;
+        }
+
+        .post-title {
+            margin: 17px 0 8px;
+
+            font-size: 19px;
+            line-height: 1.3;
+
+            letter-spacing: -0.3px;
+
+            font-weight: 650;
+        }
+
+        .post-request {
+            color: var(--text-soft);
+
+            font-size: 14px;
+            line-height: 1.6;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+
+            white-space: pre-wrap;
+        }
+
+        .post-files {
+            display: flex;
+            gap: 8px;
+
+            margin-top: 15px;
+
+            overflow-x: auto;
+
+            padding-bottom: 3px;
+        }
+
+        .post-file {
+            flex: 0 0 auto;
+
+            width: 72px;
+            height: 72px;
+
+            border-radius: 11px;
+
+            overflow: hidden;
+
+            border:
+                1px solid var(--border);
+
+            background:
+                var(--card-soft);
+
+            display: grid;
+            place-items: center;
+
+            position: relative;
+
+            color: var(--muted);
+
+            font-size: 10px;
+            font-weight: 650;
+        }
+
+        .post-file img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        .post-file-more {
+            position: absolute;
+
+            right: 5px;
+            bottom: 5px;
+
+            padding: 3px 5px;
+
+            border-radius: 6px;
+
+            background:
+                rgba(30, 28, 25, 0.75);
+
+            color: white;
+
+            font-size: 9px;
+        }
+
+        .post-answer {
+            margin-top: 16px;
+
+            padding: 13px 14px;
+
+            background:
+                var(--card-soft);
+
+            border-radius: 12px;
+
+            color: var(--text-soft);
+
+            font-size: 13px;
+            line-height: 1.55;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+
+            white-space: pre-wrap;
+        }
+
+        .post-bottom {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+
+            margin-top: 16px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-like {
+            color: var(--text-soft);
+        }
+
+        .empty {
+            text-align: center;
+
+            padding: 65px 20px;
+
+            border:
+                1px dashed var(--border-dark);
+
+            border-radius: 18px;
+
+            color: var(--muted);
+        }
+
+        .empty-title {
+            font-size: 17px;
+            font-weight: 650;
+
+            color: var(--text);
+        }
+
+        .empty-text {
+            margin-top: 7px;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* =====================================================
+           VIEW: NEW REQUEST
+        ===================================================== */
+
+        .new-view {
+            padding: 45px 0 80px;
+        }
+
+        .view-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            margin-bottom: 25px;
+        }
+
+        .view-heading h1 {
+            margin: 0;
+
+            font-size:
+                clamp(30px, 5vw, 43px);
+
+            line-height: 1.08;
+
+            letter-spacing: -1.5px;
+        }
+
+        .close-view {
+            width: 42px;
+            height: 42px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255, 253, 249, 0.8);
+
+            color: var(--text);
+
+            display: grid;
+            place-items: center;
+
+            font-size: 25px;
+
+            flex: 0 0 auto;
+        }
+
+        .composer {
+            background: var(--card);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 22px;
+
+            box-shadow: var(--shadow);
+
+            overflow: hidden;
+        }
+
+        .section {
+            padding: 24px 27px;
+        }
+
+        .section + .section {
+            border-top:
+                1px solid var(--border);
+        }
+
+        .field-label {
+            display: block;
+
+            margin-bottom: 9px;
+
+            color: #625d55;
+
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .optional {
+            color: #9a9389;
+            font-weight: 400;
+        }
+
+        .name-input {
+            width: 100%;
+            height: 48px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            background:
+                var(--card-soft);
+
+            color: var(--text);
+
+            padding: 0 14px;
+
+            outline: none;
+        }
+
+        .name-input:focus {
+            background: var(--card);
+
+            border-color:
+                var(--border-dark);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(80, 73, 64, 0.06);
+        }
+
+        .prompt-wrap {
+            position: relative;
+        }
+
+        .prompt {
+            width: 100%;
+
+            min-height: 230px;
+            max-height: 550px;
+
+            resize: vertical;
+
+            border: 0;
+            outline: none;
+
+            background: transparent;
+
+            color: var(--text);
+
+            padding:
+                3px 0 35px;
+
+            font-size: 17px;
+            line-height: 1.65;
+        }
+
+        .prompt::placeholder {
+            color: #aaa39a;
+        }
+
+        .prompt-counter {
+            position: absolute;
+
+            right: 0;
+            bottom: 4px;
+
+            color: #9a9389;
+
+            font-size: 11px;
+        }
+
+        /* =====================================================
+           DROPZONE
+        ===================================================== */
+
+        .dropzone {
+            border:
+                1.5px dashed
+                var(--border-dark);
+
+            border-radius: 16px;
+
+            background:
+                var(--card-soft);
+
+            padding: 29px 20px;
+
+            text-align: center;
+
+            transition: 0.18s ease;
+        }
+
+        .dropzone.dragover {
+            background: #f0ebe3;
+
+            border-color: #777067;
+
+            transform: scale(1.005);
+        }
+
+        .drop-icon {
+            width: 46px;
+            height: 46px;
+
+            margin: 0 auto 12px;
+
+            border-radius: 14px;
+
+            background: #ebe5dc;
+
+            display: grid;
+            place-items: center;
+
+            font-size: 20px;
+        }
+
+        .drop-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .drop-subtitle {
+            margin-top: 6px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+        }
+
+        .choose-files {
+            margin-top: 16px;
+
+            border:
+                1px solid
+                var(--border-dark);
+
+            background: var(--card);
+
+            color: var(--text);
+
+            padding: 9px 15px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .choose-files:hover {
+            background: #f1ece4;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-list {
+            display: none;
+
+            margin-top: 14px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 15px;
+
+            background:
+                var(--card-soft);
+
+            max-height: 300px;
+
+            overflow-y: auto;
+        }
+
+        .file-list.visible {
+            display: block;
+        }
+
+        .file-item {
+            min-height: 72px;
+
+            padding: 10px 12px;
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            border-bottom:
+                1px solid var(--border);
+        }
+
+        .file-item:last-child {
+            border-bottom: 0;
+        }
+
+        .file-preview {
+            width: 50px;
+            height: 50px;
+
+            flex: 0 0 50px;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+            background: #e9e3da;
+
+            display: grid;
+            place-items: center;
+
+            color: #777067;
+
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        .file-preview img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        .file-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 550;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-size {
+            margin-top: 4px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .remove-file {
+            width: 32px;
+            height: 32px;
+
+            flex: 0 0 32px;
+
+            border: 0;
+            border-radius: 9px;
+
+            background: transparent;
+
+            color: #8c847a;
+
+            font-size: 21px;
+
+            display: grid;
+            place-items: center;
+        }
+
+        .remove-file:hover {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .file-summary {
+            display: flex;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-top: 10px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        /* =====================================================
+           ERROR
+        ===================================================== */
+
+        .error-box {
+            display: none;
+
+            margin-top: 15px;
+
+            padding: 12px 14px;
+
+            border:
+                1px solid #e7c4c0;
+
+            border-radius: 12px;
+
+            background:
+                var(--danger-bg);
+
+            color: #873f39;
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .error-box.visible {
+            display: block;
+        }
+
+        /* =====================================================
+           COMPOSER FOOTER
+        ===================================================== */
+
+        .composer-footer {
+            padding: 18px 27px;
+
+            border-top:
+                1px solid var(--border);
+
+            background: #fcfaf6;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+        }
+
+        .cooldown {
+            color: var(--muted);
+
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .cooldown strong {
+            color: var(--text);
+        }
+
+        .send-button {
+            min-width: 155px;
+            height: 46px;
+
+            border: 0;
+
+            border-radius: 12px;
+
+            background:
+                var(--accent);
+
+            color: white;
+
+            padding: 0 18px;
+
+            font-size: 14px;
+            font-weight: 650;
+
+            transition: 0.18s ease;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background:
+                var(--accent-hover);
+
+            transform:
+                translateY(-1px);
+        }
+
+        .send-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* =====================================================
+           PROCESSING
+        ===================================================== */
+
+        .processing {
+            display: none;
+
+            padding: 40px 27px;
+
+            border-top:
+                1px solid var(--border);
+
+            background:
+                #fcfaf6;
+
+            text-align: center;
+        }
+
+        .processing.visible {
+            display: block;
+        }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+
+            margin: 0 auto 17px;
+
+            border:
+                3px solid #ded7cd;
+
+            border-top-color:
+                #37332e;
+
+            border-radius: 50%;
+
+            animation:
+                spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .processing-title {
+            font-size: 16px;
+            font-weight: 650;
+        }
+
+        .processing-status {
+            margin-top: 7px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+        }
+
+        .processing-note {
+            max-width: 500px;
+
+            margin: 18px auto 0;
+
+            color: #8d857b;
+
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* =====================================================
+           FULL POST
+        ===================================================== */
+
+        .post-view {
+            padding: 45px 0 80px;
+        }
+
+        .post-view-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 20px;
+
+            gap: 15px;
+        }
+
+        .back-button {
+            height: 40px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 11px;
+
+            background:
+                rgba(255, 253, 249, 0.8);
+
+            color: var(--text);
+
+            padding: 0 14px;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .full-post {
+            background: var(--card);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 22px;
+
+            box-shadow: var(--shadow);
+
+            padding: 30px;
+        }
+
+        .full-post-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+        }
+
+        .full-author {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .full-avatar {
+            width: 42px;
+            height: 42px;
+
+            border-radius: 50%;
+
+            background: #e8e1d8;
+
+            display: grid;
+            place-items: center;
+
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .full-author-name {
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .full-date {
+            margin-top: 3px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+        }
+
+        .full-model {
+            color: var(--muted);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 9px;
+
+            padding: 7px 10px;
+
+            font-size: 11px;
+        }
+
+        .full-title {
+            margin:
+                27px 0 20px;
+
+            font-size:
+                clamp(27px, 4vw, 42px);
+
+            line-height: 1.12;
+
+            letter-spacing: -1.2px;
+
+            font-weight: 670;
+        }
+
+        .content-label {
+            margin-bottom: 9px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+
+            font-weight: 700;
+        }
+
+        .full-request {
+            padding: 17px;
+
+            background:
+                var(--card-soft);
+
+            border-radius: 13px;
+
+            color: var(--text-soft);
+
+            font-size: 15px;
+            line-height: 1.7;
+
+            white-space: pre-wrap;
+        }
+
+        .full-files {
+            margin-top: 27px;
+        }
+
+        .full-file-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fill, minmax(150px, 1fr));
+
+            gap: 11px;
+        }
+
+        .full-file {
+            min-height: 140px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 13px;
+
+            overflow: hidden;
+
+            background:
+                var(--card-soft);
+
+            text-decoration: none;
+
+            display: flex;
+            flex-direction: column;
+
+            transition: 0.18s ease;
+        }
+
+        .full-file:hover {
+            border-color:
+                var(--border-dark);
+
+            transform:
+                translateY(-1px);
+        }
+
+        .full-file-preview {
+            height: 105px;
+
+            display: grid;
+            place-items: center;
+
+            background:
+                #eee8df;
+
+            color: var(--muted);
+
+            font-size: 15px;
+            font-weight: 700;
+
+            overflow: hidden;
+        }
+
+        .full-file-preview img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        .full-file-name {
+            padding: 9px;
+
+            color: var(--text-soft);
+
+            font-size: 11px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .full-answer {
+            margin-top: 30px;
+        }
+
+        .answer-content {
+            padding: 21px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 15px;
+
+            background: #fffefa;
+
+            color: var(--text);
+
+            font-size: 15px;
+            line-height: 1.75;
+
+            white-space: pre-wrap;
+
+            overflow-wrap: anywhere;
+        }
+
+        .full-post-footer {
+            display: flex;
+            align-items: center;
+
+            gap: 9px;
+
+            margin-top: 28px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid var(--border);
+        }
+
+        .reaction-button {
+            height: 39px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 10px;
+
+            background:
+                var(--card-soft);
+
+            color: var(--text-soft);
+
+            padding: 0 12px;
+
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .reaction-button:hover {
+            background: #f0ebe3;
+        }
+
+        .reaction-button.active {
+            background: #e9e2d9;
+            border-color: #bdb3a6;
+        }
+
+        .view-stat {
+            margin-left: auto;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        /* =====================================================
+           LOADING
+        ===================================================== */
+
+        .loading {
+            padding: 60px 20px;
+
+            text-align: center;
+
+            color: var(--muted);
+        }
+
+        .loading .spinner {
+            margin-bottom: 13px;
+        }
+
+        /* =====================================================
+           TOAST
+        ===================================================== */
+
+        .toast-container {
+            position: fixed;
+
+            left: 50%;
+            bottom: 22px;
+
+            transform:
+                translateX(-50%);
+
+            z-index: 500;
+
+            width:
+                min(420px, calc(100% - 30px));
+
+            pointer-events: none;
+        }
+
+        .toast {
+            background:
+                rgba(37, 35, 31, 0.94);
+
+            color: white;
+
+            padding: 12px 15px;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.18);
+
+            animation:
+                toastIn 0.2s ease;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .topbar {
+                height: 64px;
+                padding: 0 16px;
+            }
+
+            .app {
+                width:
+                    calc(100% - 20px);
+            }
+
+            .home {
+                padding-top: 30px;
+            }
+
+            .hero {
+                padding-top: 15px;
+            }
+
+            .hero h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .post-card {
+                padding: 17px;
+            }
+
+            .post-model {
+                display: none;
+            }
+
+            .section {
+                padding:
+                    21px 18px;
+            }
+
+            .composer-footer {
+                padding:
+                    16px 18px;
+
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .send-button {
+                width: 100%;
+            }
+
+            .file-summary {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .full-post {
+                padding: 20px;
+            }
+
+            .full-model {
+                display: none;
+            }
+
+            .full-post-footer {
+                flex-wrap: wrap;
+            }
+
+            .view-stat {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .full-file-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <a
+        href="#"
+        class="brand"
+        id="brandHome"
+    >
+        <span class="brand-mark">C</span>
+        <span>ChatStudio</span>
+    </a>
+
+    <div class="header-actions">
+
+        <button
+            class="header-button"
+            id="headerNewButton"
+            type="button"
+        >
+            + Новый запрос
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="app" id="app">
+
+    <!-- =====================================================
+         HOME
+    ====================================================== -->
+
+    <section
+        class="home"
+        id="homeView"
+    >
+
+        <div class="hero">
+
+            <h1>
+                Запросы.<br>
+                Ответы. ИИ.
+            </h1>
+
+            <p>
+                Общая доска запросов к ИИ.
+                Создавайте запросы с файлами,
+                смотрите ответы и находите
+                интересные решения других пользователей.
+            </p>
+
+            <button
+                class="new-button"
+                id="heroNewButton"
+                type="button"
+            >
+                + Новое сообщение
+            </button>
+
+        </div>
+
+
+        <div class="search-wrap">
+
+            <span class="search-icon">
+                ⌕
+            </span>
+
+            <input
+                class="search-input"
+                id="searchInput"
+                type="search"
+                autocomplete="off"
+                placeholder="Поиск по запросам, заголовкам и ответам..."
+            >
+
+        </div>
+
+
+        <div class="feed-header">
+
+            <h2 class="feed-title">
+                Последние запросы
+            </h2>
+
+            <span
+                class="feed-count"
+                id="feedCount"
+            >
+                Загрузка…
+            </span>
+
+        </div>
+
+
+        <div
+            class="feed"
+            id="feed"
+        >
+
+            <div class="loading">
+                <div class="spinner"></div>
+                Загружаем посты…
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         NEW REQUEST
+    ====================================================== -->
+
+    <section
+        class="new-view hidden"
+        id="newView"
+    >
+
+        <div class="view-heading">
+
+            <h1>
+                Новый запрос
+            </h1>
+
+            <button
+                class="close-view"
+                id="closeNewButton"
+                type="button"
+                aria-label="Закрыть"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="composer">
+
+            <!-- NAME -->
+
+            <div class="section">
+
+                <label
+                    class="field-label"
+                    for="nameInput"
+                >
+                    Имя
+                    <span class="optional">
+                        · можно указать любое
+                    </span>
+                </label>
+
+                <input
+                    id="nameInput"
+                    class="name-input"
+                    type="text"
+                    maxlength="80"
+                    autocomplete="off"
+                    placeholder="Например, Тимур"
+                >
+
+            </div>
+
+
+            <!-- PROMPT -->
+
+            <div class="section">
+
+                <label
+                    class="field-label"
+                    for="promptInput"
+                >
+                    Запрос
+                </label>
+
+                <div class="prompt-wrap">
+
+                    <textarea
+                        id="promptInput"
+                        class="prompt"
+                        maxlength="50000"
+                        placeholder="Что нужно сделать? Опишите задачу как можно понятнее..."
+                    ></textarea>
+
+                    <div
+                        class="prompt-counter"
+                        id="promptCounter"
+                    >
+                        0 / 50000
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FILES -->
+
+            <div class="section">
+
+                <label class="field-label">
+                    Файлы
+                    <span class="optional">
+                        · необязательно
+                    </span>
+                </label>
+
+
+                <div
+                    class="dropzone"
+                    id="dropzone"
+                >
+
+                    <div class="drop-icon">
+                        ↑
+                    </div>
+
+                    <div class="drop-title">
+                        Перетащите файлы сюда
+                    </div>
+
+                    <div class="drop-subtitle">
+                        или выберите их с устройства
+                    </div>
+
+                    <button
+                        class="choose-files"
+                        id="chooseFiles"
+                        type="button"
+                    >
+                        Выбрать файлы
+                    </button>
+
+                    <input
+                        id="fileInput"
+                        type="file"
+                        multiple
+                    >
+
+                </div>
+
+
+                <div
+                    class="file-list"
+                    id="fileList"
+                ></div>
+
+
+                <div class="file-summary">
+
+                    <span id="fileCount">
+                        Файлов: 0
+                    </span>
+
+                    <span id="totalSize">
+                        Размер: 0 Б
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="error-box"
+                    id="errorBox"
+                ></div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="composer-footer">
+
+                <div
+                    class="cooldown"
+                    id="cooldownText"
+                >
+                    После отправки новый запрос можно будет
+                    создать через <strong>30 секунд</strong>.
+                </div>
+
+                <button
+                    class="send-button"
+                    id="sendButton"
+                    type="button"
+                >
+                    Отправить запрос
+                </button>
+
+            </div>
+
+
+            <!-- PROCESSING -->
+
+            <div
+                class="processing"
+                id="processing"
+            >
+
+                <div class="spinner"></div>
+
+                <div class="processing-title">
+                    Запрос отправлен
+                </div>
+
+                <div
+                    class="processing-status"
+                    id="processingStatus"
+                >
+                    ИИ начинает обработку…
+                </div>
+
+                <div class="processing-note">
+                    Запрос уже находится на сервере.
+                    После завершения обработки откроется
+                    готовый пост.
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FULL POST
+    ====================================================== -->
+
+    <section
+        class="post-view hidden"
+        id="postView"
+    >
+
+        <div class="post-view-header">
+
+            <button
+                class="back-button"
+                id="backFromPost"
+                type="button"
+            >
+                ← Назад
+            </button>
+
+        </div>
+
+
+        <div
+            id="fullPostContainer"
+        >
+
+            <div class="loading">
+
+                <div class="spinner"></div>
+
+                Загружаем пост…
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<div
+    class="toast-container"
+    id="toastContainer"
+></div>
+
+
 <script>
-const API={posts:"/api/posts",post:id=>"/api/posts/"+encodeURIComponent(id),like:id=>"/api/posts/"+encodeURIComponent(id)+"/like",requests:"/api/requests",status:id=>"/api/requests/"+encodeURIComponent(id)};
-const state={posts:[],sort:"recommended",search:"",parent:null,current:null,chain:[],files:[],sending:false};const $=id=>document.getElementById(id);
-function sid(){let x=localStorage.getItem("chatstudio_session_id");if(!x){x=(crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random());localStorage.setItem("chatstudio_session_id",x)}return x}
-async function api(u,o={}){o.headers=Object.assign({"X-Session-ID":sid()},o.headers||{});let r=await fetch(u,o),d=null;try{d=await r.json()}catch{}if(!r.ok)throw Error(d?.detail||d?.error||d?.message||("Ошибка "+r.status));return d}
-function esc(x){return String(x??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function norm(p){return{...p,id:p.id??p.post_id,title:p.title||p.name||makeTitle(p.prompt||p.request),author:p.author_name||p.author||p.name||"Аноним",prompt:p.prompt||p.request||"",answer:p.answer||p.response||"",files:Array.isArray(p.files)?p.files:[],likes:Number(p.likes||0),views:Number(p.views||0),model:p.model||p.model_name||"ИИ",created_at:p.created_at||p.createdAt||null,parent_post_id:p.parent_post_id||null}}
-function makeTitle(x){x=String(x||"").replace(/\s+/g," ").trim();return x?x.slice(0,80)+(x.length>80?"…":""):"Новый запрос"}
-function fmt(x){let d=new Date(x);return isNaN(d)?"только что":d.toLocaleString("ru-RU",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}
-function marked(id){return localStorage.getItem("chatstudio_like_"+id)==="1"}
-function markdown(x){let s=esc(x);s=s.replace(/^### (.+)$/gm,"<h3>$1</h3>").replace(/^## (.+)$/gm,"<h2>$1</h2>").replace(/^# (.+)$/gm,"<h1>$1</h1>").replace(/^> (.+)$/gm,"<blockquote>$1</blockquote>").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");return s.split(/\n{2,}/).map(function(v){return /^<(h[1-3]|blockquote)/.test(v.trim())?v:"<p>"+v.replace(/\n/g,"<br>")+"</p>"}).join("")}
-function filesHtml(fs){return(fs||[]).map(function(f){let u=f.url||f.download_url||f.file_url||f.path,n=f.name||f.filename||"Файл";return u?'<a class="filelink" target="_blank" rel="noopener" href="'+esc(u)+'">📎 '+esc(n)+"</a>":'<span class="filelink">📎 '+esc(n)+"</span>"}).join("")}
-async function load(){try{let d=await api(API.posts+"?limit=100");state.posts=(d.posts||d.items||d||[]).map(norm);render()}catch(e){$("feed").innerHTML='<div class="empty">'+esc(e.message)+"</div>"}}
-function list(){let a=state.posts.slice(),q=state.search.toLowerCase().trim();if(q)a=a.filter(p=>(p.title+" "+p.author+" "+p.prompt+" "+p.answer).toLowerCase().includes(q));if(state.sort==="top")a.sort((x,y)=>y.likes-x.likes||y.views-x.views);else if(state.sort==="new")a.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));else if(state.sort==="old")a.sort((x,y)=>new Date(x.created_at)-new Date(y.created_at));else a.sort(()=>Math.random()-.5);return a}
-function card(p){return'<article class="card" data-id="'+esc(p.id)+'"><div class="meta"><div class="author"><div class="avatar">'+esc((p.author||"А").charAt(0).toUpperCase())+'</div><div><b>'+esc(p.author)+'</b><div class="muted">'+esc(fmt(p.created_at))+"</div></div></div><div class=\"model\">"+esc(p.model)+"</div></div><div class=\"title\">"+esc(p.title)+"</div>"+(p.parent_post_id?'<div class="badge">Продолжение диалога · открыть полный чат</div>':"")+(p.prompt?'<div class="req">'+esc(p.prompt)+"</div>":"")+(p.answer?'<div class="preview">'+markdown(p.answer)+"</div>":"")+'<div class="bottom"><button class="action" data-like="'+esc(p.id)+'">'+(marked(p.id)?"♥":"♡")+" "+p.likes+'</button><span>◉ '+p.views+'</span><button class="action continue" data-cont="'+esc(p.id)+'">↩ Продолжить</button></div></article>'}
-function render(){let a=list();$("count").textContent=a.length+" "+(a.length===1?"пост":a.length<5?"поста":"постов");$("feed").innerHTML=a.length?a.map(card).join(""):'<div class="empty">Пока нет постов.</div>';document.querySelectorAll(".card").forEach(function(c){c.onclick=function(){open(c.dataset.id)}});document.querySelectorAll("[data-like]").forEach(function(b){b.onclick=async function(e){e.stopPropagation();let id=b.dataset.like;if(marked(id))return;localStorage.setItem("chatstudio_like_"+id,"1");try{let d=await api(API.like(id),{method:"POST"});b.textContent="♥ "+(d.likes??"")}catch{}}});document.querySelectorAll("[data-cont]").forEach(function(b){b.onclick=function(e){e.stopPropagation();start(b.dataset.cont)}})}
-async function open(id){try{let d=await api(API.post(id));state.current=norm(d.post||d);state.chain=[];let p=state.current;for(let i=0;p&&i<100;i++){state.chain.unshift(p);if(!p.parent_post_id)break;try{let q=await api(API.post(p.parent_post_id));p=norm(q.post||q)}catch{break}}renderChat();show("chat")}catch(e){toast(e.message)}}
-function renderChat(){$("chatTitle").textContent=makeTitle(state.chain[0]?.prompt||"Чат");$("chat").innerHTML=state.chain.map(function(p,i){return'<article class="turn user"><div class="turnlabel">Запрос '+(i+1)+" · "+esc(p.author)+"</div><div class="content\">"+esc(p.prompt||"Запрос с файлами")+"</div>"+filesHtml(p.files)+'<div class="turnactions"><button class="action" data-like-chat="'+esc(p.id)+'">'+(marked(p.id)?"♥":"♡")+" "+p.likes+'</button><button class="btn" data-next="'+esc(p.id)+'">Продолжить отсюда</button></div></article><article class=\"turn\"><div class=\"turnlabel\">Ответ ИИ · "+esc(p.model)+"</div><div class=\"content answer\">"+markdown(p.answer||"Ответ отсутствует.")+"</div><div class="turnactions"><button class="btn" data-next="'+esc(p.id)+'">Продолжить диалог</button></div></article>"}) .join("");document.querySelectorAll("[data-next]").forEach(function(b){b.onclick=function(){start(b.dataset.next)}});document.querySelectorAll("[data-like-chat]").forEach(function(b){b.onclick=async function(){let id=b.dataset.likeChat;if(marked(id))return;localStorage.setItem("chatstudio_like_"+id,"1");try{let d=await api(API.like(id),{method:"POST"});b.textContent="♥ "+(d.likes??"")}catch{}}})}
-function start(id){let p=state.chain.find(x=>String(x.id)===String(id))||state.posts.find(x=>String(x.id)===String(id));if(!p)return;state.parent=p.id;$("context").classList.remove("hidden");$("composerTitle").textContent="Продолжение диалога";show("new");$("prompt").focus()}
-function show(v){$("homeView").classList.toggle("hidden",v!=="home");$("newView").classList.toggle("hidden",v!=="new");$("chatView").classList.toggle("hidden",v!=="chat");if(v==="home")history.replaceState(null,"","/")}
-function reset(){state.parent=null;state.files=[];$("context").classList.add("hidden");$("composerTitle").textContent="Новый запрос";$("prompt").value="";$("name").value="";$("fileInput").value="";$("processing").classList.add("hidden");$("error").classList.add("hidden");renderFiles()}
-function newReq(){reset();show("new")}
-function toast(x){$("toast").textContent=x;$("toast").classList.remove("hidden");setTimeout(function(){$("toast").classList.add("hidden")},2500)}
-function renderFiles(){$("fileList").innerHTML=state.files.map(function(f,i){return'<div class="file"><div>📎</div><div class="fileinfo"><div class="filename">'+esc(f.name)+'</div><div class="muted">'+esc(Math.round(f.size/1024/1024*10)/10+" МБ")+'</div></div><button class="remove" data-r="'+i+'">×</button></div>'}).join("");document.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){state.files.splice(+b.dataset.r,1);renderFiles()}})}
-function addFiles(fs){let total=state.files.reduce((a,f)=>a+f.size,0);if(state.files.length+fs.length>20)return toast("Не более 20 файлов");for(let f of fs){if(f.size>20*1024*1024)return toast("Файл «"+f.name+"» больше 20 МБ");if(total+f.size>50*1024*1024)return toast("Общий размер файлов больше 50 МБ");state.files.push(f);total+=f.size}renderFiles()}
-function cd(){let left=Math.max(0,30-Math.floor((Date.now()-Number(localStorage.getItem("chatstudio_last_request_at")||0))/1000));$("cooldown").textContent=left?"Следующий запрос через "+left+" сек.":"";return left}
-async function send(){if(state.sending)return;$("error").classList.add("hidden");if(cd())return;let prompt=$("prompt").value.trim();if(!prompt&&!state.files.length)return err("Введите запрос или прикрепите файл.");state.sending=true;$("send").disabled=true;$("processing").classList.remove("hidden");$("status").textContent="ИИ начинает обработку…";let fd=new FormData();fd.append("name",$("name").value.trim());fd.append("prompt",prompt);if(state.parent)fd.append("parent_post_id",state.parent);state.files.forEach(function(f){fd.append("files",f,f.name)});try{let d=await api(API.requests,{method:"POST",body:fd});localStorage.setItem("chatstudio_last_request_at",Date.now());if(d.post_id||d.postId||d.post){await open(d.post_id||d.postId||d.post.id||d.post);return}let id=d.request_id||d.requestId;if(id){await poll(id);return}if(d.id){await open(d.id);return}throw Error("Сервер не вернул идентификатор результата.")}catch(e){fail(e.message)}}
-function err(x){$("error").textContent=x;$("error").classList.remove("hidden")}function fail(x){state.sending=false;$("send").disabled=false;$("processing").classList.add("hidden");err(x)}
-async function poll(id){for(let i=0;i<600;i++){await new Promise(r=>setTimeout(r,1500));try{let d=await api(API.status(id)),s=String(d.status||"").toLowerCase();$("status").textContent=d.message||({queued:"Запрос в очереди…",processing:"ИИ обрабатывает запрос…"}[s]||"ИИ обрабатывает запрос…");let pid=d.post_id||d.postId||d.result?.post_id;if(pid){await open(pid);return}if(["failed","error"].includes(s))throw Error(d.error||"Обработка завершилась ошибкой.")}catch(e){if(e.message!=="Ошибка сервера"){fail(e.message);return}}}fail("Время ожидания ответа истекло.")}
-$("new").onclick=newReq;$("home").onclick=function(){reset();show("home");load()};$("brand").onclick=function(e){e.preventDefault();$("home").click()};$("cancel").onclick=function(){reset();show("home")};$("back").onclick=function(){show("home")};$("continue").onclick=function(){if(state.current)start(state.current.id)};$("search").oninput=function(e){state.search=e.target.value;render()};$("sort").onchange=function(e){state.sort=e.target.value;render()};$("prompt").oninput=function(e){$("counter").textContent=e.target.value.length.toLocaleString("ru-RU")+" / 50 000"};$("choose").onclick=function(){$("fileInput").click()};$("fileInput").onchange=function(e){addFiles([...e.target.files])};$("drop").ondragover=function(e){e.preventDefault()};$("drop").ondrop=function(e){e.preventDefault();addFiles([...e.dataTransfer.files])};$("send").onclick=send;setInterval(cd,1000);load();let q=new URLSearchParams(location.search);if(q.get("post")||q.get("id"))open(q.get("post")||q.get("id"));else if(q.get("new"))newReq();
-</script></body></html>
+/* ============================================================
+   CHATSTUDIO FRONTEND
+   ============================================================ */
+
+/*
+ * Весь сайт находится в одном index.html.
+ *
+ * Экраны:
+ *
+ * HOME
+ * NEW REQUEST
+ * FULL POST
+ *
+ * Backend API:
+ *
+ * GET  /api/posts
+ * GET  /api/posts/:id
+ * POST /api/posts/:id/view
+ * POST /api/posts/:id/like
+ * POST /api/posts/:id/dislike
+ * POST /api/requests
+ * GET  /api/requests/:id
+ *
+ * Backend позже можно изменить без переделки интерфейса.
+ */
+
+
+/* ============================================================
+   CONFIG
+   ============================================================ */
+
+const API = {
+
+    posts:
+        "/api/posts",
+
+    post:
+        id =>
+            `/api/posts/${encodeURIComponent(id)}`,
+
+    view:
+        id =>
+            `/api/posts/${encodeURIComponent(id)}/view`,
+
+    like:
+        id =>
+            `/api/posts/${encodeURIComponent(id)}/like`,
+
+    dislike:
+        id =>
+            `/api/posts/${encodeURIComponent(id)}/dislike`,
+
+    requests:
+        "/api/requests",
+
+    requestStatus:
+        id =>
+            `/api/requests/${encodeURIComponent(id)}`
+};
+
+
+/*
+ * Предварительные лимиты браузера.
+ *
+ * Backend обязательно должен проверять их повторно.
+ */
+
+const MAX_FILE_SIZE =
+    20 * 1024 * 1024;
+
+const MAX_TOTAL_SIZE =
+    50 * 1024 * 1024;
+
+const MAX_PROMPT_LENGTH =
+    50000;
+
+const COOLDOWN_SECONDS =
+    30;
+
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+
+const STORAGE = {
+
+    session:
+        "chatstudio_session_id",
+
+    lastRequest:
+        "chatstudio_last_request_at",
+
+    likedPrefix:
+        "chatstudio_like_",
+
+    dislikedPrefix:
+        "chatstudio_dislike_",
+
+    viewedPrefix:
+        "chatstudio_view_"
+};
+
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+const state = {
+    view: "home",
+    posts: [],
+    search: "",
+    sort: "recommended",
+    selectedFiles: [],
+    isSubmitting: false,
+    currentPost: null,
+    parentPostId: null,
+    polling: false,
+    cooldownTimer: null
+};
+
+
+/* ============================================================
+   DOM
+   ============================================================ */
+
+const homeView =
+    document.getElementById(
+        "homeView"
+    );
+
+const newView =
+    document.getElementById(
+        "newView"
+    );
+
+const postView =
+    document.getElementById(
+        "postView"
+    );
+
+const feed =
+    document.getElementById(
+        "feed"
+    );
+
+const feedCount =
+    document.getElementById(
+        "feedCount"
+    );
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+const headerNewButton =
+    document.getElementById(
+        "headerNewButton"
+    );
+
+const heroNewButton =
+    document.getElementById(
+        "heroNewButton"
+    );
+
+const brandHome =
+    document.getElementById(
+        "brandHome"
+    );
+
+const closeNewButton =
+    document.getElementById(
+        "closeNewButton"
+    );
+
+const backFromPost =
+    document.getElementById(
+        "backFromPost"
+    );
+
+const nameInput =
+    document.getElementById(
+        "nameInput"
+    );
+
+const promptInput =
+    document.getElementById(
+        "promptInput"
+    );
+
+const promptCounter =
+    document.getElementById(
+        "promptCounter"
+    );
+
+const fileInput =
+    document.getElementById(
+        "fileInput"
+    );
+
+const chooseFiles =
+    document.getElementById(
+        "chooseFiles"
+    );
+
+const dropzone =
+    document.getElementById(
+        "dropzone"
+    );
+
+const fileList =
+    document.getElementById(
+        "fileList"
+    );
+
+const fileCount =
+    document.getElementById(
+        "fileCount"
+    );
+
+const totalSize =
+    document.getElementById(
+        "totalSize"
+    );
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
+
+const cooldownText =
+    document.getElementById(
+        "cooldownText"
+    );
+
+const sendButton =
+    document.getElementById(
+        "sendButton"
+    );
+
+const processing =
+    document.getElementById(
+        "processing"
+    );
+
+const processingStatus =
+    document.getElementById(
+        "processingStatus"
+    );
+
+const fullPostContainer =
+    document.getElementById(
+        "fullPostContainer"
+    );
+
+const toastContainer =
+    document.getElementById(
+        "toastContainer"
+    );
+
+
+/* ============================================================
+   SESSION
+   ============================================================ */
+
+function getSessionId() {
+
+    let id =
+        sessionStorage.getItem(
+            STORAGE.session
+        );
+
+    if (!id) {
+
+        id =
+            "s_" +
+            Date.now().toString(36) +
+            "_" +
+            randomString();
+
+        sessionStorage.setItem(
+            STORAGE.session,
+            id
+        );
+    }
+
+    return id;
+}
+
+
+function randomString() {
+
+    if (
+        window.crypto &&
+        window.crypto.getRandomValues
+    ) {
+
+        const array =
+            new Uint32Array(2);
+
+        window.crypto.getRandomValues(
+            array
+        );
+
+        return (
+            array[0].toString(36) +
+            array[1].toString(36)
+        );
+    }
+
+    return Math.random()
+        .toString(36)
+        .slice(2);
+}
+
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function formatBytes(bytes) {
+
+    if (!bytes) {
+        return "0 Б";
+    }
+
+    const units = [
+        "Б",
+        "КБ",
+        "МБ",
+        "ГБ"
+    ];
+
+    let value =
+        Number(bytes);
+
+    let index = 0;
+
+    while (
+        value >= 1024 &&
+        index < units.length - 1
+    ) {
+
+        value /= 1024;
+        index++;
+    }
+
+    const rounded =
+        index === 0
+            ? Math.round(value)
+            : value.toFixed(
+                value >= 10
+                    ? 1
+                    : 2
+            );
+
+    return `${rounded} ${units[index]}`;
+}
+
+
+function formatDate(value) {
+
+    if (!value) {
+        return "";
+    }
+
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return "";
+    }
+
+    return date.toLocaleString(
+        "ru-RU",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+}
+
+
+function getInitial(name) {
+
+    const value =
+        String(name || "")
+            .trim();
+
+    if (!value) {
+        return "?";
+    }
+
+    return value
+        .charAt(0)
+        .toUpperCase();
+}
+
+
+function showToast(message) {
+
+    const toast =
+        document.createElement(
+            "div"
+        );
+
+    toast.className =
+        "toast";
+
+    toast.textContent =
+        message;
+
+    toastContainer.appendChild(
+        toast
+    );
+
+    setTimeout(
+        () => {
+            toast.remove();
+        },
+        3000
+    );
+}
+
+
+function showError(message) {
+
+    errorBox.textContent =
+        message;
+
+    errorBox.classList.add(
+        "visible"
+    );
+}
+
+
+function hideError() {
+
+    errorBox.textContent =
+        "";
+
+    errorBox.classList.remove(
+        "visible"
+    );
+}
+
+
+/* ============================================================
+   VIEW SWITCHING
+   ============================================================ */
+
+function showView(name) {
+
+    homeView.classList.add(
+        "hidden"
+    );
+
+    newView.classList.add(
+        "hidden"
+    );
+
+    postView.classList.add(
+        "hidden"
+    );
+
+    if (name === "home") {
+
+        homeView.classList.remove(
+            "hidden"
+        );
+
+        state.view =
+            "home";
+
+        document.title =
+            "ChatStudio";
+
+    } else if (name === "new") {
+
+        newView.classList.remove(
+            "hidden"
+        );
+
+        state.view =
+            "new";
+
+        document.title =
+            "Новый запрос — ChatStudio";
+
+        nameInput.focus();
+
+    } else if (name === "post") {
+
+        postView.classList.remove(
+            "hidden"
+        );
+
+        state.view =
+            "post";
+
+        document.title =
+            "Пост — ChatStudio";
+    }
+
+    window.scrollTo(
+        {
+            top: 0,
+            behavior: "instant"
+        }
+    );
+}
+
+
+/* ============================================================
+   HOME
+   ============================================================ */
+
+function openHome() {
+
+    showView("home");
+
+    loadPosts();
+}
+
+
+headerNewButton.addEventListener(
+    "click",
+    () => {
+
+        resetNewRequest();
+
+        showView("new");
+    }
+);
+
+
+heroNewButton.addEventListener(
+    "click",
+    () => {
+
+        resetNewRequest();
+
+        showView("new");
+    }
+);
+
+
+brandHome.addEventListener(
+    "click",
+    event => {
+
+        event.preventDefault();
+
+        openHome();
+    }
+);
+
+
+closeNewButton.addEventListener(
+    "click",
+    () => {
+
+        if (
+            state.isSubmitting
+        ) {
+            return;
+        }
+
+        if (
+            hasUnsavedRequest()
+        ) {
+
+            const confirmed =
+                confirm(
+                    "Введённые данные будут потеряны. Закрыть?"
+                );
+
+            if (!confirmed) {
+                return;
+            }
+        }
+
+        resetNewRequest();
+
+        openHome();
+    }
+);
+
+
+backFromPost.addEventListener(
+    "click",
+    () => {
+
+        openHome();
+    }
+);
+
+
+/* ============================================================
+   LOAD POSTS
+   ============================================================ */
+
+async function loadPosts() {
+
+    feed.innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            Загружаем посты…
+        </div>
+    `;
+
+    try {
+
+        const response =
+            await fetch(
+                API.posts,
+                {
+                    method: "GET",
+                    headers: {
+                        "X-Session-ID":
+                            getSessionId()
+                    },
+                    cache: "no-store"
+                }
+            );
+
+        const data =
+            await parseResponse(
+                response
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                `Ошибка сервера: ${response.status}`
+            );
+        }
+
+        /*
+         * Поддерживаем:
+         *
+         * [...]
+         *
+         * {
+         *   posts: [...]
+         * }
+         */
+
+        if (Array.isArray(data)) {
+
+            state.posts =
+                data;
+
+        } else if (
+            data &&
+            Array.isArray(data.posts)
+        ) {
+
+            state.posts =
+                data.posts;
+
+        } else {
+
+            state.posts =
+                [];
+        }
+
+        renderFeed();
+
+    } catch (error) {
+
+        feed.innerHTML = `
+            <div class="empty">
+
+                <div class="empty-title">
+                    Не удалось загрузить ленту
+                </div>
+
+                <div class="empty-text">
+                    ${escapeHtml(
+                        error.message ||
+                        "Ошибка соединения с сервером."
+                    )}
+                </div>
+
+            </div>
+        `;
+
+        feedCount.textContent =
+            "";
+    }
+}
+
+
+/* ============================================================
+   NORMALIZE POST
+   ============================================================ */
+
+function normalizePost(raw) {
+    const post = raw || {};
+    let files = post.files || post.attachments || [];
+    if (!Array.isArray(files)) files = [];
+    return {
+        id: post.id ?? post.post_id,
+        title: post.title || post.name || createTitle(post.prompt || post.request || ""),
+        author: post.author_name || post.author || post.name || "Аноним",
+        prompt: post.prompt || post.request || post.text || "",
+        answer: post.answer || post.response || post.ai_answer || "",
+        files: files,
+        likes: Number(post.likes ?? post.like_count ?? 0),
+        views: Number(post.views ?? post.view_count ?? 0),
+        dislikes: Number(post.dislikes ?? post.dislike_count ?? 0),
+        model: post.model || post.model_name || "ИИ",
+        created_at: post.created_at || post.createdAt || post.date || null,
+        parent_post_id: post.parent_post_id || null
+    };
+}
+
+
+function createTitle(text) {
+
+    const value =
+        String(text || "")
+            .trim()
+            .replace(/\s+/g, " ");
+
+    if (!value) {
+        return "Новый запрос";
+    }
+
+    return value.length > 80
+        ? value.slice(0, 80) + "…"
+        : value;
+}
+
+
+/* ============================================================
+   FILTER
+   ============================================================ */
+
+function getFilteredPosts() {
+    const query = state.search.trim().toLowerCase();
+    let posts = state.posts.map(normalizePost);
+
+    if (query) {
+        posts = posts.filter(post => {
+            const haystack = [
+                post.title, post.author, post.prompt, post.answer,
+                ...post.files.map(file => getFileName(file))
+            ].join(" ").toLowerCase();
+            return haystack.includes(query);
+        });
+    }
+
+    if (state.sort === "top") {
+        posts.sort((a, b) => (b.likes * 10 + b.views) - (a.likes * 10 + a.views));
+    } else if (state.sort === "new") {
+        posts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    } else if (state.sort === "old") {
+        posts.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+    } else {
+        posts.sort((a, b) => {
+            const score = post => {
+                const age = Math.max(0, (Date.now() - new Date(post.created_at || Date.now()).getTime()) / 86400000);
+                return Math.log1p(post.likes * 3 + post.views) * 2 + 1 / (1 + age) + Math.random() * 0.35;
+            };
+            return score(b) - score(a);
+        });
+    }
+
+    return posts;
+}
+
+
+/* ============================================================
+   RENDER FEED
+   ============================================================ */
+
+function renderFeed() {
+    const header = document.querySelector(".feed-header");
+    if (header && !document.getElementById("feedTools")) {
+        const tools = document.createElement("div");
+        tools.id = "feedTools";
+        tools.className = "feed-tools";
+        tools.innerHTML = '<select class="feed-sort" id="feedSort" aria-label="Сортировка"><option value="recommended">Рекомендации</option><option value="top">Популярные</option><option value="new">Новые</option><option value="old">Старые</option></select>';
+        header.parentNode.insertBefore(tools, feed);
+        const select = document.getElementById("feedSort");
+        select.value = state.sort;
+        select.addEventListener("change", event => { state.sort = event.target.value; renderFeed(); });
+    }
+
+    const posts = getFilteredPosts();
+    feedCount.textContent = `${posts.length} ${pluralize(posts.length, "пост", "поста", "постов")}`;
+
+    if (!posts.length) {
+        feed.innerHTML = `<div class="empty"><div class="empty-title">${state.search ? "Ничего не найдено" : "Пока нет постов"}</div><div class="empty-text">${state.search ? "Попробуйте изменить поисковый запрос." : "Создайте первый запрос к ИИ."}</div></div>`;
+        return;
+    }
+
+    feed.innerHTML = posts.map(renderPostCard).join("");
+
+    feed.querySelectorAll("[data-post-id]").forEach(card => {
+        card.addEventListener("click", () => openPost(card.dataset.postId));
+    });
+    feed.querySelectorAll("[data-feed-like]").forEach(button => {
+        button.addEventListener("click", event => { event.stopPropagation(); likePost(button.dataset.feedLike); });
+    });
+    feed.querySelectorAll("[data-feed-continue]").forEach(button => {
+        button.addEventListener("click", event => { event.stopPropagation(); continueDialog(button.dataset.feedContinue); });
+    });
+    typesetMath(feed);
+}
+
+
+function pluralize(
+    number,
+    one,
+    few,
+    many
+) {
+
+    const n =
+        Math.abs(number) % 100;
+
+    const n1 =
+        n % 10;
+
+    if (
+        n > 10 &&
+        n < 20
+    ) {
+        return many;
+    }
+
+    if (n1 > 1 && n1 < 5) {
+        return few;
+    }
+
+    if (n1 === 1) {
+        return one;
+    }
+
+    return many;
+}
+
+
+/* ============================================================
+   POST CARD
+   ============================================================ */
+
+function renderPostCard(post) {
+    const files = post.files || [];
+    const fileHtml = files.length ? `<div class="post-files">${files.slice(0, 8).map((file, index) => renderSmallFile(file, index, files.length)).join("")}</div>` : "";
+    const liked = hasReacted(STORAGE.likedPrefix, post.id);
+
+    return `<article class="post-card" data-post-id="${escapeHtml(post.id)}">
+        <div class="post-top">
+            <div class="post-author">
+                <div class="avatar">${escapeHtml(getInitial(post.author))}</div>
+                <div><div class="author-name">${escapeHtml(post.author)}</div><div class="post-date">${escapeHtml(formatDate(post.created_at))}</div></div>
+            </div>
+            <div class="post-model">${escapeHtml(post.model)}</div>
+        </div>
+        <h3 class="post-title">${escapeHtml(post.title)}</h3>
+        ${post.parent_post_id ? '<div class="context-badge">Продолжение диалога</div>' : ""}
+        ${post.prompt ? `<div class="post-request">${escapeHtml(post.prompt)}</div>` : ""}
+        ${fileHtml}
+        ${post.answer ? `<div class="post-answer">${renderAnswer(post.answer)}</div>` : ""}
+        <div class="post-bottom">
+            <button type="button" class="feed-action feed-like ${liked ? "active" : ""}" data-feed-like="${escapeHtml(post.id)}">${liked ? "♥" : "♡"} ${post.likes}</button>
+            <span class="stat">◉ ${post.views}</span>
+            <button type="button" class="feed-action feed-continue" data-feed-continue="${escapeHtml(post.id)}">↩ Продолжить</button>
+            <span class="stat post-continue">открыть →</span>
+        </div>
+    </article>`;
+}
+
+
+function renderSmallFile(
+    file,
+    index,
+    total
+) {
+
+    const url =
+        getFileUrl(file);
+
+    const name =
+        getFileName(file);
+
+    const isImage =
+        isImageFile(
+            file
+        );
+
+    return `
+        <div class="post-file">
+
+            ${
+                isImage && url
+                    ? `
+                        <img
+                            src="${escapeHtml(url)}"
+                            alt=""
+                            loading="lazy"
+                        >
+                    `
+                    : escapeHtml(
+                        getFileIcon(
+                            file
+                        )
+                    )
+            }
+
+            ${
+                index === 7 &&
+                total > 8
+                    ? `
+                        <span class="post-file-more">
+                            +${total - 8}
+                        </span>
+                    `
+                    : ""
+            }
+
+        </div>
+    `;
+}
+
+
+/* ============================================================
+   FILE HELPERS
+   ============================================================ */
+
+function getFileName(file) {
+
+    return (
+        file.name ||
+        file.filename ||
+        file.original_name ||
+        "Файл"
+    );
+}
+
+
+function getFileUrl(file) {
+
+    return (
+        file.url ||
+        file.download_url ||
+        file.path ||
+        file.href ||
+        ""
+    );
+}
+
+
+function isImageFile(file) {
+
+    const type =
+        String(
+            file.type ||
+            file.mime_type ||
+            ""
+        ).toLowerCase();
+
+    if (
+        type.startsWith(
+            "image/"
+        )
+    ) {
+        return true;
+    }
+
+    const name =
+        getFileName(
+            file
+        ).toLowerCase();
+
+    return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i
+        .test(name);
+}
+
+
+function getFileIcon(file) {
+
+    const type =
+        String(
+            file.type ||
+            file.mime_type ||
+            ""
+        ).toLowerCase();
+
+    const name =
+        getFileName(
+            file
+        ).toLowerCase();
+
+    if (
+        type.startsWith(
+            "video/"
+        )
+    ) {
+        return "▶";
+    }
+
+    if (
+        type.startsWith(
+            "audio/"
+        )
+    ) {
+        return "♫";
+    }
+
+    if (
+        name.endsWith(".pdf")
+    ) {
+        return "PDF";
+    }
+
+    if (
+        /\.(doc|docx)$/i.test(name)
+    ) {
+        return "W";
+    }
+
+    if (
+        /\.(xls|xlsx)$/i.test(name)
+    ) {
+        return "X";
+    }
+
+    if (
+        /\.(ppt|pptx)$/i.test(name)
+    ) {
+        return "P";
+    }
+
+    if (
+        /\.(zip|rar|7z)$/i.test(name)
+    ) {
+        return "ZIP";
+    }
+
+    if (
+        /\.(py|js|ts|html|css|json)$/i.test(name)
+    ) {
+        return "</>";
+    }
+
+    return "FILE";
+}
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+searchInput.addEventListener(
+    "input",
+    () => {
+
+        state.search =
+            searchInput.value;
+
+        renderFeed();
+    }
+);
+
+
+/* ============================================================
+   OPEN POST
+   ============================================================ */
+
+async function openPost(id) {
+
+    showView("post");
+
+    fullPostContainer.innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            Загружаем пост…
+        </div>
+    `;
+
+    try {
+
+        const response =
+            await fetch(
+                API.post(id),
+                {
+                    method: "GET",
+                    headers: {
+                        "X-Session-ID":
+                            getSessionId()
+                    },
+                    cache: "no-store"
+                }
+            );
+
+        const data =
+            await parseResponse(
+                response
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Не удалось загрузить пост."
+            );
+        }
+
+        const raw =
+            data.post ||
+            data;
+
+        const post =
+            normalizePost(
+                raw
+            );
+
+        state.currentPost =
+            post;
+
+        renderFullPost(
+            post
+        );
+
+        state.isSubmitting =
+            false;
+
+        sendButton.disabled =
+            false;
+
+        nameInput.disabled =
+            false;
+
+        promptInput.disabled =
+            false;
+
+        chooseFiles.disabled =
+            false;
+
+        processing.classList.remove(
+            "visible"
+        );
+
+        await registerView(
+            post.id
+        );
+
+    } catch (error) {
+
+        state.isSubmitting =
+            false;
+
+        sendButton.disabled =
+            false;
+
+        nameInput.disabled =
+            false;
+
+        promptInput.disabled =
+            false;
+
+        chooseFiles.disabled =
+            false;
+
+        processing.classList.remove(
+            "visible"
+        );
+
+        fullPostContainer.innerHTML = `
+            <div class="empty">
+
+                <div class="empty-title">
+                    Не удалось открыть пост
+                </div>
+
+                <div class="empty-text">
+                    ${escapeHtml(
+                        error.message ||
+                        "Ошибка соединения."
+                    )}
+                </div>
+
+            </div>
+        `;
+    }
+}
+
+function renderAnswer(text) {
+    const source = String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+    if (!source) return "";
+
+    const lines = source.split("\n");
+    const out = [];
+    let paragraph = [];
+    let list = null;
+    let code = false;
+    let codeLines = [];
+
+    const flush = () => {
+        if (!paragraph.length) return;
+        out.push("<p>" + inlineMarkdown(paragraph.join("\n")) + "</p>");
+        paragraph = [];
+    };
+    const closeList = () => {
+        if (list) { out.push("</" + list + ">"); list = null; }
+    };
+
+    for (const line of lines) {
+        if (line.trim().slice(0, 3) === "```") {
+            flush(); closeList();
+            if (code) { out.push("<pre><code>" + escapeHtml(codeLines.join("\n")) + "</code></pre>"); codeLines = []; }
+            code = !code;
+            continue;
+        }
+        if (code) { codeLines.push(line); continue; }
+        if (!line.trim()) { flush(); closeList(); continue; }
+
+        let m = line.match(/^\s*(#{1,3})\s+(.+)$/);
+        if (m) { flush(); closeList(); const n = m[1].length; out.push("<h" + n + ">" + inlineMarkdown(m[2]) + "</h" + n + ">"); continue; }
+
+        m = line.match(/^\s*[-*•]\s+(.+)$/);
+        if (m) { flush(); if (list !== "ul") { closeList(); out.push("<ul>"); list = "ul"; } out.push("<li>" + inlineMarkdown(m[1]) + "</li>"); continue; }
+
+        m = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        if (m) { flush(); if (list !== "ol") { closeList(); out.push("<ol>"); list = "ol"; } out.push("<li>" + inlineMarkdown(m[1]) + "</li>"); continue; }
+
+        if (/^\s*>\s?/.test(line)) { flush(); closeList(); out.push("<blockquote>" + inlineMarkdown(line.replace(/^\s*>\s?/, "")) + "</blockquote>"); continue; }
+
+        closeList();
+        paragraph.push(line);
+    }
+
+    flush(); closeList();
+    if (code) out.push("<pre><code>" + escapeHtml(codeLines.join("\n")) + "</code></pre>");
+    return out.join("");
+}
+
+
+function inlineMarkdown(text) {
+    let value = escapeHtml(text);
+    const math = [];
+    const saveMath = value => { const marker = "%%MATH" + math.length + "%%"; math.push(value); return marker; };
+    value = value.replace(/\$\$[\s\S]+?\$\$/g, saveMath);
+    value = value.replace(/\\\[[\s\S]+?\\\]/g, saveMath);
+    value = value.replace(/\\\([\s\S]+?\\\)/g, saveMath);
+    value = value.replace(/\$[^$\n]+?\$/g, saveMath);
+    value = value.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+    value = value.replace(/__([^_\n]+)__/g, "<strong>$1</strong>");
+    value = value.replace(/~~([^~\n]+)~~/g, "<del>$1</del>");
+    value = value.replace(/%%MATH(\d+)%%/g, (_, i) => math[Number(i)]);
+    return value.replace(/\n/g, "<br>");
+}
+
+
+function typesetMath(element) {
+    if (!element || !window.renderMathInElement) return;
+    try {
+        window.renderMathInElement(element, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "\\[", right: "\\]", display: true},
+                {left: "\\(", right: "\\)", display: false},
+                {left: "$", right: "$", display: false}
+            ],
+            throwOnError: false,
+            strict: false
+        });
+    } catch (_) {}
+}
+
+
+function loadKaTeX() {
+    if (window.renderMathInElement) return;
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css";
+    document.head.appendChild(css);
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js";
+    script.onload = () => {
+        const auto = document.createElement("script");
+        auto.src = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js";
+        auto.onload = () => { if (state.view === "home") renderFeed(); else if (state.currentPost) renderFullPost(state.currentPost); };
+        document.head.appendChild(auto);
+    };
+    document.head.appendChild(script);
+}
+
+
+function injectFrontendStyles() {
+    const style = document.createElement("style");
+    style.textContent =
+        ".feed-tools{display:flex;gap:8px;align-items:center;margin:0 0 14px}" +
+        ".feed-sort{height:36px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:12px;font-weight:600}" +
+        ".feed-action{height:34px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text-soft);padding:0 10px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;cursor:pointer}" +
+        ".feed-action:hover{background:#f0ebe3;border-color:var(--border-dark)}" +
+        ".feed-action.active{background:#e9e2d9;border-color:#bdb3a6}" +
+        ".answer-content{white-space:normal;overflow-wrap:anywhere}" +
+        ".answer-content p{margin:0 0 13px}.answer-content p:last-child{margin-bottom:0}" +
+        ".answer-content h1,.answer-content h2,.answer-content h3{margin:22px 0 10px;line-height:1.25}" +
+        ".answer-content ul,.answer-content ol{margin:8px 0 14px;padding-left:25px}.answer-content li{margin:4px 0}" +
+        ".answer-content blockquote{margin:12px 0;padding:9px 14px;border-left:3px solid var(--border-dark);color:var(--text-soft);background:var(--card-soft)}" +
+        ".answer-content pre{margin:14px 0;padding:14px;overflow:auto;background:#f1ece4;border:1px solid var(--border);border-radius:10px}" +
+        ".answer-content .katex-display{overflow-x:auto;padding:5px 0}" +
+        ".continue-dialog-button{height:40px;border:1px solid var(--border-dark);border-radius:11px;background:var(--accent);color:#fff;padding:0 14px;font-size:13px;font-weight:650}" +
+        ".continue-dialog-button:hover{background:var(--accent-hover)}" +
+        ".context-badge{margin-top:8px;color:var(--muted);font-size:11px}" +
+        ".post-bottom{flex-wrap:wrap}" +
+        "@media(max-width:700px){.feed-tools{width:100%}.feed-sort{width:100%}.continue-dialog-button{width:100%}}";
+    document.head.appendChild(style);
+}
+
+
+/* ============================================================
+   FULL POST
+   ============================================================ */
+
+function renderFullPost(post) {
+    const files = post.files || [];
+    const filesHtml = files.length ? `<div class="full-files"><div class="content-label">Файлы · ${files.length}</div><div class="full-file-grid">${files.map(renderFullFile).join("")}</div></div>` : "";
+    const liked = hasReacted(STORAGE.likedPrefix, post.id);
+    const disliked = hasReacted(STORAGE.dislikedPrefix, post.id);
+
+    fullPostContainer.innerHTML = `<article class="full-post">
+        <div class="full-post-meta">
+            <div class="full-author">
+                <div class="full-avatar">${escapeHtml(getInitial(post.author))}</div>
+                <div><div class="full-author-name">${escapeHtml(post.author)}</div><div class="full-date">${escapeHtml(formatDate(post.created_at))}</div></div>
+            </div>
+            <div class="full-model">Модель: ${escapeHtml(post.model)}</div>
+        </div>
+        <h1 class="full-title">${escapeHtml(post.title)}</h1>
+        ${post.parent_post_id ? '<div class="context-badge">Это продолжение предыдущего диалога</div>' : ""}
+        ${post.prompt ? `<div><div class="content-label">Запрос</div><div class="full-request">${escapeHtml(post.prompt)}</div></div>` : ""}
+        ${filesHtml}
+        ${post.answer ? `<div class="full-answer"><div class="content-label">Ответ ИИ</div><div class="answer-content">${renderAnswer(post.answer)}</div></div>` : ""}
+        <div class="full-post-footer" id="postReactions">
+            <button class="reaction-button ${liked ? "active" : ""}" id="likeButton" type="button">${liked ? "♥" : "♡"} <span id="likeCount">${post.likes}</span></button>
+            <button class="reaction-button ${disliked ? "active" : ""}" id="dislikeButton" type="button">👎</button>
+            <button class="continue-dialog-button" id="continueDialogButton" type="button">↩ Продолжить диалог</button>
+            <div class="view-stat">◉ ${post.views} просмотров</div>
+        </div>
+    </article>`;
+
+    document.getElementById("likeButton").addEventListener("click", () => likePost(post.id));
+    document.getElementById("dislikeButton").addEventListener("click", () => dislikePost(post.id));
+    document.getElementById("continueDialogButton").addEventListener("click", () => continueDialog(post.id));
+    typesetMath(fullPostContainer);
+}
+
+
+function renderFullFile(file) {
+
+    const url =
+        getFileUrl(
+            file
+        );
+
+    const name =
+        getFileName(
+            file
+        );
+
+    const image =
+        isImageFile(
+            file
+        );
+
+
+    return `
+        <a
+            class="full-file"
+            href="${escapeHtml(url || "#")}"
+            ${
+                url
+                    ? `
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    `
+                    : ""
+            }
+            ${
+                !url
+                    ? `
+                        onclick="return false;"
+                    `
+                    : ""
+            }
+        >
+
+            <div class="full-file-preview">
+
+                ${
+                    image && url
+                        ? `
+                            <img
+                                src="${escapeHtml(url)}"
+                                alt="${escapeHtml(name)}"
+                                loading="lazy"
+                            >
+                        `
+                        : escapeHtml(
+                            getFileIcon(
+                                file
+                            )
+                        )
+                }
+
+            </div>
+
+            <div
+                class="full-file-name"
+                title="${escapeHtml(name)}"
+            >
+                ${escapeHtml(name)}
+            </div>
+
+        </a>
+    `;
+}
+
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+
+async function registerView(id) {
+
+    if (
+        hasReacted(
+            STORAGE.viewedPrefix,
+            id
+        )
+    ) {
+        return;
+    }
+
+    /*
+     * Сначала ставим локальный флаг.
+     * Это не даёт одной вкладке отправить
+     * несколько просмотров.
+     */
+
+    markReacted(
+        STORAGE.viewedPrefix,
+        id
+    );
+
+    try {
+
+        const response =
+            await fetch(
+                API.view(id),
+                {
+                    method: "POST",
+                    headers: {
+                        "X-Session-ID":
+                            getSessionId()
+                    }
+                }
+            );
+
+        if (!response.ok) {
+            return;
+        }
+
+    } catch {
+        // Сервер может быть временно недоступен.
+    }
+}
+
+
+async function likePost(id) {
+
+    if (
+        hasReacted(
+            STORAGE.likedPrefix,
+            id
+        )
+    ) {
+
+        showToast(
+            "Вы уже поставили лайк."
+        );
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API.like(id),
+                {
+                    method: "POST",
+                    headers: {
+                        "X-Session-ID":
+                            getSessionId()
+                    }
+                }
+            );
+
+        const data =
+            await parseResponse(
+                response
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Не удалось поставить лайк."
+            );
+        }
+
+
+        markReacted(
+            STORAGE.likedPrefix,
+            id
+        );
+
+
+        const count =
+            document.getElementById(
+                "likeCount"
+            );
+
+        if (count) {
+
+            const serverCount =
+                Number(
+                    data.likes ??
+                    data.like_count
+                );
+
+            if (
+                Number.isFinite(
+                    serverCount
+                )
+            ) {
+
+                count.textContent =
+                    serverCount;
+
+            } else {
+
+                count.textContent =
+                    String(
+                        Number(
+                            count.textContent
+                        ) + 1
+                    );
+            }
+        }
+
+
+        document
+            .getElementById(
+                "likeButton"
+            )
+            ?.classList.add(
+                "active"
+            );
+
+    } catch (error) {
+
+        showToast(
+            error.message ||
+            "Ошибка."
+        );
+    }
+}
+
+
+async function dislikePost(id) {
+
+    if (
+        hasReacted(
+            STORAGE.dislikedPrefix,
+            id
+        )
+    ) {
+
+        showToast(
+            "Вы уже отправили дизлайк."
+        );
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                API.dislike(id),
+                {
+                    method: "POST",
+                    headers: {
+                        "X-Session-ID":
+                            getSessionId()
+                    }
+                }
+            );
+
+        const data =
+            await parseResponse(
+                response
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Не удалось отправить дизлайк."
+            );
+        }
+
+
+        markReacted(
+            STORAGE.dislikedPrefix,
+            id
+        );
+
+
+        document
+            .getElementById(
+                "dislikeButton"
+            )
+            ?.classList.add(
+                "active"
+            );
+
+
+        showToast(
+            "Спасибо за обратную связь."
+        );
+
+    } catch (error) {
+
+        showToast(
+            error.message ||
+            "Ошибка."
+        );
+    }
+}
+
+
+async function continueDialog(postId) {
+    let post = state.currentPost && String(state.currentPost.id) === String(postId) ? state.currentPost : null;
+
+    if (!post) {
+        try {
+            const response = await fetch(API.post(postId), { headers: {"X-Session-ID": getSessionId()}, cache: "no-store" });
+            const data = await parseResponse(response);
+            if (!response.ok) throw new Error(data.message || data.error || "Не удалось загрузить исходный пост.");
+            post = normalizePost(data.post || data);
+        } catch (error) {
+            showToast(error.message || "Не удалось продолжить диалог.");
+            return;
+        }
+    }
+
+    state.parentPostId = post.id;
+    state.selectedFiles = [];
+    nameInput.value = post.author || "";
+    promptInput.value = "";
+    fileInput.value = "";
+    processing.classList.remove("visible");
+    hideError();
+    renderFiles();
+    updatePromptCounter();
+    showView("new");
+}
+
+
+/* ============================================================
+   REACTION STORAGE
+   ============================================================ */
+
+function reactionKey(
+    prefix,
+    id
+) {
+
+    return (
+        prefix +
+        String(id)
+    );
+}
+
+
+function hasReacted(
+    prefix,
+    id
+) {
+
+    return (
+        sessionStorage.getItem(
+            reactionKey(
+                prefix,
+                id
+            )
+        ) === "1"
+    );
+}
+
+
+function markReacted(
+    prefix,
+    id
+) {
+
+    sessionStorage.setItem(
+        reactionKey(
+            prefix,
+            id
+        ),
+        "1"
+    );
+}
+
+
+/* ============================================================
+   NEW REQUEST RESET
+   ============================================================ */
+
+function resetNewRequest() {
+    if (state.isSubmitting) return;
+    state.parentPostId = null;
+    state.selectedFiles = [];
+    nameInput.value = "";
+    promptInput.value = "";
+    fileInput.value = "";
+    processing.classList.remove("visible");
+    hideError();
+    renderFiles();
+    updatePromptCounter();
+    updateCooldownUI();
+}
+
+
+function hasUnsavedRequest() {
+
+    return Boolean(
+        nameInput.value.trim() ||
+        promptInput.value.trim() ||
+        state.selectedFiles.length
+    );
+}
+
+
+/* ============================================================
+   PROMPT
+   ============================================================ */
+
+promptInput.addEventListener(
+    "input",
+    updatePromptCounter
+);
+
+
+function updatePromptCounter() {
+
+    promptCounter.textContent =
+        `${promptInput.value.length} / ${MAX_PROMPT_LENGTH}`;
+}
+
+
+/* ============================================================
+   FILE INPUT
+   ============================================================ */
+
+chooseFiles.addEventListener(
+    "click",
+    () =>
+        fileInput.click()
+);
+
+
+fileInput.addEventListener(
+    "change",
+    () => {
+
+        addFiles(
+            fileInput.files
+        );
+    }
+);
+
+
+/* ============================================================
+   FILE VALIDATION
+   ============================================================ */
+
+function getTotalFilesSize() {
+
+    return state.selectedFiles.reduce(
+        (
+            sum,
+            file
+        ) =>
+            sum + file.size,
+        0
+    );
+}
+
+
+function validateFile(file) {
+
+    if (
+        file.size >
+        MAX_FILE_SIZE
+    ) {
+
+        return `
+            Файл «${file.name}» слишком большой.
+            Максимальный размер одного файла —
+            ${formatBytes(MAX_FILE_SIZE)}.
+        `;
+    }
+
+
+    if (
+        getTotalFilesSize() +
+        file.size >
+        MAX_TOTAL_SIZE
+    ) {
+
+        return `
+            Общий размер файлов не может
+            превышать ${formatBytes(MAX_TOTAL_SIZE)}.
+        `;
+    }
+
+
+    return null;
+}
+
+
+function addFiles(files) {
+
+    hideError();
+
+    const incoming =
+        Array.from(files || []);
+
+
+    for (
+        const file of incoming
+    ) {
+
+        const duplicate =
+            state.selectedFiles.some(
+                existing =>
+                    existing.name === file.name &&
+                    existing.size === file.size &&
+                    existing.lastModified === file.lastModified
+            );
+
+
+        if (duplicate) {
+            continue;
+        }
+
+
+        const error =
+            validateFile(
+                file
+            );
+
+
+        if (error) {
+
+            showError(
+                error
+            );
+
+            continue;
+        }
+
+
+        state.selectedFiles.push(
+            file
+        );
+    }
+
+
+    renderFiles();
+
+    fileInput.value =
+        "";
+}
+
+
+/* ============================================================
+   RENDER SELECTED FILES
+   ============================================================ */
+
+function renderFiles() {
+
+    fileList.innerHTML =
+        "";
+
+
+    if (
+        state.selectedFiles.length === 0
+    ) {
+
+        fileList.classList.remove(
+            "visible"
+        );
+
+        fileCount.textContent =
+            "Файлов: 0";
+
+        totalSize.textContent =
+            "Размер: 0 Б";
+
+        return;
+    }
+
+
+    fileList.classList.add(
+        "visible"
+    );
+
+
+    state.selectedFiles.forEach(
+        (
+            file,
+            index
+        ) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "file-item";
+
+
+            const preview =
+                document.createElement(
+                    "div"
+                );
+
+            preview.className =
+                "file-preview";
+
+
+            if (
+                file.type &&
+                file.type.startsWith(
+                    "image/"
+                )
+            ) {
+
+                const image =
+                    document.createElement(
+                        "img"
+                    );
+
+                image.alt =
+                    file.name;
+
+                const url =
+                    URL.createObjectURL(
+                        file
+                    );
+
+                image.src =
+                    url;
+
+                image.onload =
+                    () =>
+                        URL.revokeObjectURL(
+                            url
+                        );
+
+                preview.appendChild(
+                    image
+                );
+
+            } else {
+
+                preview.textContent =
+                    getFileIcon({
+                        name:
+                            file.name,
+                        type:
+                            file.type
+                    });
+            }
+
+
+            const info =
+                document.createElement(
+                    "div"
+                );
+
+            info.className =
+                "file-info";
+
+
+            info.innerHTML = `
+                <div class="file-name">
+                    ${escapeHtml(
+                        file.name
+                    )}
+                </div>
+
+                <div class="file-size">
+                    ${formatBytes(
+                        file.size
+                    )}
+                </div>
+            `;
+
+
+            const remove =
+                document.createElement(
+                    "button"
+                );
+
+            remove.type =
+                "button";
+
+            remove.className =
+                "remove-file";
+
+            remove.textContent =
+                "×";
+
+            remove.title =
+                "Удалить файл";
+
+
+            remove.addEventListener(
+                "click",
+                () =>
+                    removeFile(
+                        index
+                    )
+            );
+
+
+            item.appendChild(
+                preview
+            );
+
+            item.appendChild(
+                info
+            );
+
+            item.appendChild(
+                remove
+            );
+
+
+            fileList.appendChild(
+                item
+            );
+        }
+    );
+
+
+    const total =
+        getTotalFilesSize();
+
+
+    fileCount.textContent =
+        `Файлов: ${
+            state.selectedFiles.length
+        }`;
+
+
+    totalSize.textContent =
+        `Размер: ${
+            formatBytes(total)
+        }`;
+}
+
+
+function removeFile(index) {
+
+    state.selectedFiles.splice(
+        index,
+        1
+    );
+
+    hideError();
+
+    renderFiles();
+}
+
+
+/* ============================================================
+   DRAG & DROP
+   ============================================================ */
+
+[
+    "dragenter",
+    "dragover"
+].forEach(
+    eventName => {
+
+        dropzone.addEventListener(
+            eventName,
+            event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                dropzone.classList.add(
+                    "dragover"
+                );
+            }
+        );
+    }
+);
+
+
+[
+    "dragleave",
+    "drop"
+].forEach(
+    eventName => {
+
+        dropzone.addEventListener(
+            eventName,
+            event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                dropzone.classList.remove(
+                    "dragover"
+                );
+            }
+        );
+    }
+);
+
+
+dropzone.addEventListener(
+    "drop",
+    event => {
+
+        addFiles(
+            event.dataTransfer.files
+        );
+    }
+);
+
+
+/* ============================================================
+   COOLDOWN
+   ============================================================ */
+
+function getRemainingCooldown() {
+
+    const last =
+        Number(
+            sessionStorage.getItem(
+                STORAGE.lastRequest
+            )
+        );
+
+
+    if (!last) {
+        return 0;
+    }
+
+
+    const elapsed =
+        Math.floor(
+            (
+                Date.now() -
+                last
+            ) / 1000
+        );
+
+
+    return Math.max(
+        0,
+        COOLDOWN_SECONDS -
+        elapsed
+    );
+}
+
+
+function saveCooldown() {
+
+    sessionStorage.setItem(
+        STORAGE.lastRequest,
+        String(
+            Date.now()
+        )
+    );
+}
+
+
+function updateCooldownUI() {
+
+    const remaining =
+        getRemainingCooldown();
+
+
+    if (
+        remaining <= 0
+    ) {
+
+        cooldownText.innerHTML =
+            `
+                После отправки новый запрос
+                можно будет создать через
+                <strong>30 секунд</strong>.
+            `;
+
+
+        if (
+            !state.isSubmitting
+        ) {
+            sendButton.disabled =
+                false;
+        }
+
+
+        return;
+    }
+
+
+    cooldownText.innerHTML =
+        `
+            Следующий запрос можно будет
+            отправить через
+            <strong>${remaining} сек.</strong>
+        `;
+
+
+    if (
+        !state.isSubmitting
+    ) {
+        sendButton.disabled =
+            true;
+    }
+}
+
+
+function startCooldownTimer() {
+
+    if (
+        state.cooldownTimer
+    ) {
+
+        clearInterval(
+            state.cooldownTimer
+        );
+    }
+
+
+    updateCooldownUI();
+
+
+    state.cooldownTimer =
+        setInterval(
+            () => {
+
+                updateCooldownUI();
+
+                if (
+                    getRemainingCooldown() <= 0
+                ) {
+
+                    clearInterval(
+                        state.cooldownTimer
+                    );
+
+                    state.cooldownTimer =
+                        null;
+                }
+
+            },
+            250
+        );
+}
+
+
+function setProcessingStatus(message) {
+    if (processingStatus) {
+        processingStatus.textContent = message;
+    }
+}
+
+/* ============================================================
+   SUBMIT REQUEST
+   ============================================================ */
+
+sendButton.addEventListener(
+    "click",
+    submitRequest
+);
+
+
+async function submitRequest() {
+
+    if (
+        state.isSubmitting
+    ) {
+        return;
+    }
+
+
+    hideError();
+
+
+    const remaining =
+        getRemainingCooldown();
+
+
+    if (
+        remaining > 0
+    ) {
+
+        showError(
+            `Подождите ещё ${remaining} сек.`
+        );
+
+        return;
+    }
+
+
+    const name =
+        nameInput.value.trim();
+
+    const prompt =
+        promptInput.value.trim();
+
+
+    if (
+        !prompt &&
+        state.selectedFiles.length === 0
+    ) {
+
+        showError(
+            "Введите запрос или прикрепите хотя бы один файл."
+        );
+
+        promptInput.focus();
+
+        return;
+    }
+
+
+    if (
+        prompt.length >
+        MAX_PROMPT_LENGTH
+    ) {
+
+        showError(
+            `Запрос слишком длинный. Максимум — ${MAX_PROMPT_LENGTH.toLocaleString("ru-RU")} символов.`
+        );
+
+        return;
+    }
+
+
+    for (
+        const file of state.selectedFiles
+    ) {
+
+        const error =
+            validateFile(
+                file
+            );
+
+        if (error) {
+
+            showError(
+                error
+            );
+
+            return;
+        }
+    }
+
+
+    state.isSubmitting =
+        true;
+
+
+    sendButton.disabled =
+        true;
+
+    nameInput.disabled =
+        true;
+
+    promptInput.disabled =
+        true;
+
+    chooseFiles.disabled =
+        true;
+
+
+    processing.classList.add(
+        "visible"
+    );
+
+
+    setProcessingStatus(
+        "Отправляем запрос на сервер…"
+    );
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "name",
+        name
+    );
+
+
+    formData.append(
+    "prompt",
+    prompt
+);
+
+if (state.parentPostId) {
+    formData.append(
+        "parent_post_id",
+        state.parentPostId
+    );
+}
+state.selectedFiles.forEach(
+        file => {
+
+            formData.append(
+                "files",
+                file,
+                file.name
+            );
+        }
+    );
+
+
+    let response;
+
+
+    try {
+
+        response =
+            await fetch(
+                API.requests,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "X-Session-ID":
+                            getSessionId()
+                    },
+
+                    body:
+                        formData
+                }
+            );
+
+    } catch {
+
+        requestFailed(
+            "Не удалось соединиться с сервером."
+        );
+
+        return;
+    }
+
+
+    let data;
+
+
+    try {
+
+        data =
+            await parseResponse(
+                response
+            );
+
+    } catch {
+
+        data = {};
+    }
+
+
+    if (
+        !response.ok
+    ) {
+
+        requestFailed(
+            data.message ||
+            data.error ||
+            `Ошибка сервера: ${response.status}`
+        );
+
+        return;
+    }
+
+
+    /*
+     * Сервер принял запрос.
+     * Начинаем cooldown именно сейчас.
+     */
+
+    saveCooldown();
+    startCooldownTimer();
+
+
+    setProcessingStatus(
+        "Запрос принят. ИИ начинает обработку…"
+    );
+
+
+    /*
+     * Если backend сразу вернул готовый post.
+     */
+
+    const directPostId =
+        extractPostId(
+            data
+        );
+
+
+    if (
+        directPostId !== null
+    ) {
+
+        await openPost(
+            directPostId
+        );
+
+        return;
+    }
+
+
+    /*
+     * Если backend работает асинхронно.
+     */
+
+    const requestId =
+        data.request_id ??
+        data.requestId;
+
+
+    if (
+        requestId !== undefined &&
+        requestId !== null
+    ) {
+
+        try {
+
+            await pollRequest(
+                requestId
+            );
+
+        } catch (
+            error
+        ) {
+
+            requestFailed(
+                error.message ||
+                "Не удалось получить результат."
+            );
+        }
+
+        return;
+    }
+
+
+    /*
+     * Дополнительный вариант:
+     * backend вернул просто id.
+     */
+
+    if (
+        data.id != null
+    ) {
+
+        await openPost(
+            data.id
+        );
+
+        return;
+    }
+
+
+    requestFailed(
+        "Сервер принял запрос, но не вернул идентификатор результата."
+    );
+}
+
+
+/* ============================================================
+   REQUEST FAILED
+   ============================================================ */
+
+function requestFailed(
+    message
+) {
+
+    state.isSubmitting =
+        false;
+
+
+    nameInput.disabled =
+        false;
+
+    promptInput.disabled =
+        false;
+
+    chooseFiles.disabled =
+        false;
+
+
+    processing.classList.remove(
+        "visible"
+    );
+
+
+    showError(
+        message
+    );
+
+
+    updateCooldownUI();
+}
+
+
+/* ============================================================
+   POLLING
+   ============================================================ */
+
+async function pollRequest(
+    requestId
+) {
+
+    for (
+        let attempt = 0;
+        attempt < 600;
+        attempt++
+    ) {
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    1500
+                )
+        );
+
+
+        let response;
+
+
+        try {
+
+            response =
+                await fetch(
+                    API.requestStatus(
+                        requestId
+                    ),
+                    {
+                        method:
+                            "GET",
+
+                        headers: {
+                            "X-Session-ID":
+                                getSessionId()
+                        },
+
+                        cache:
+                            "no-store"
+                    }
+                );
+
+        } catch {
+
+            setProcessingStatus(
+                "Соединение временно прервалось. Повторяем проверку…"
+            );
+
+            continue;
+        }
+
+
+        const data =
+            await parseResponse(
+                response
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Не удалось проверить состояние запроса."
+            );
+        }
+
+
+        const postId =
+            extractPostId(
+                data
+            );
+
+
+        if (
+            postId !== null
+        ) {
+
+            await openPost(
+                postId
+            );
+
+            return;
+        }
+
+
+        const status =
+            String(
+                data.status ||
+                ""
+            )
+                .toLowerCase();
+
+
+        if (
+            status === "error" ||
+            status === "failed"
+        ) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "ИИ не смог обработать запрос."
+            );
+        }
+
+
+        if (
+            status === "queued" ||
+            status === "queue"
+        ) {
+
+            setProcessingStatus(
+                "Запрос находится в очереди…"
+            );
+
+            continue;
+        }
+
+
+        if (
+            status === "processing" ||
+            status === "running" ||
+            status === "generating"
+        ) {
+
+            setProcessingStatus(
+                "ИИ обрабатывает запрос…"
+            );
+
+            continue;
+        }
+
+
+        setProcessingStatus(
+            "ИИ продолжает обработку…"
+        );
+    }
+
+
+    throw new Error(
+        "Запрос обрабатывается слишком долго. Он уже находится на сервере."
+    );
+}
+
+
+/* ============================================================
+   EXTRACT POST ID
+   ============================================================ */
+
+function extractPostId(
+    data
+) {
+
+    if (!data) {
+        return null;
+    }
+
+
+    if (
+        data.post &&
+        data.post.id != null
+    ) {
+
+        return data.post.id;
+    }
+
+
+    if (
+        data.post_id != null
+    ) {
+
+        return data.post_id;
+    }
+
+
+    if (
+        data.id != null &&
+        (
+            data.status === "done" ||
+            data.status === "completed" ||
+            data.type === "post"
+        )
+    ) {
+
+        return data.id;
+    }
+
+
+    return null;
+}
+
+
+/* ============================================================
+   PARSE RESPONSE
+   ============================================================ */
+
+async function parseResponse(
+    response
+) {
+
+    const contentType =
+        response.headers.get(
+            "content-type"
+        ) || "";
+
+
+    if (
+        contentType.includes(
+            "application/json"
+        )
+    ) {
+
+        return await response.json();
+    }
+
+
+    const text =
+        await response.text();
+
+
+    try {
+
+        return JSON.parse(
+            text
+        );
+
+    } catch {
+
+        return {
+            message:
+                text
+        };
+    }
+}
+
+
+/* ============================================================
+   KEYBOARD
+   ============================================================ */
+
+promptInput.addEventListener(
+    "keydown",
+    event => {
+
+        /*
+         * Ctrl + Enter / Cmd + Enter
+         * отправляет запрос.
+         */
+
+        if (
+            event.key === "Enter" &&
+            (
+                event.ctrlKey ||
+                event.metaKey
+            )
+        ) {
+
+            event.preventDefault();
+
+            submitRequest();
+        }
+    }
+);
+
+
+/* ============================================================
+   BEFORE UNLOAD
+   ============================================================ */
+
+window.addEventListener(
+    "beforeunload",
+    event => {
+
+        /*
+         * Во время обработки запрос уже
+         * находится на сервере, поэтому
+         * предупреждать здесь не нужно.
+         */
+
+        if (
+            state.isSubmitting
+        ) {
+            return;
+        }
+
+
+        if (
+            state.view !== "new"
+        ) {
+            return;
+        }
+
+
+        if (
+            hasUnsavedRequest()
+        ) {
+
+            event.preventDefault();
+
+            event.returnValue =
+                "";
+        }
+    }
+);
+
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+
+getSessionId();
+
+injectFrontendStyles();
+loadKaTeX();
+
+updatePromptCounter();
+
+renderFiles();
+
+startCooldownTimer();
+
+showView("home");
+
+loadPosts();
+
+
+/* ============================================================
+   URL SUPPORT
+   ============================================================ */
+
+/*
+ * Поддерживаем:
+ *
+ * /
+ * /?post=123
+ * /?id=123
+ *
+ * Это позволит открывать конкретный пост
+ * даже после обновления страницы.
+ */
+
+function checkInitialUrl() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const postId =
+        params.get("post") ||
+        params.get("id");
+
+
+    if (
+        postId
+    ) {
+
+        openPost(
+            postId
+        );
+    }
+}
+
+
+checkInitialUrl();
+
+
+/* ============================================================
+   HISTORY
+   ============================================================ */
+
+window.addEventListener(
+    "popstate",
+    () => {
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const postId =
+            params.get("post") ||
+            params.get("id");
+
+
+        if (
+            postId
+        ) {
+
+            openPost(
+                postId
+            );
+
+        } else {
+
+            showView(
+                "home"
+            );
+
+            loadPosts();
+        }
+    }
+);
+
+
+/* ============================================================
+   PATCH OPEN POST FOR HISTORY
+   ============================================================ */
+
+const originalOpenPost =
+    openPost;
+
+
+/*
+ * Здесь специально оставляем обычную
+ * навигацию через состояние приложения.
+ *
+ * При необходимости backend/nginx позже
+ * сможет отдавать index.html на любой route.
+ */
+
+
+/* ============================================================
+   END
+   ============================================================ */
+</script>
+
+</body>
+</html>
