@@ -285,6 +285,32 @@ def init_db() -> None:
                 session_id TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS chats (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS messages (
+                id TEXT PRIMARY KEY,
+                chat_id TEXT NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                request_id TEXT,
+                post_id TEXT,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+                FOREIGN KEY(request_id) REFERENCES requests(id) ON DELETE SET NULL,
+                FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE SET NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_messages_chat
+                ON messages(chat_id, created_at);
+
+            CREATE INDEX IF NOT EXISTS idx_chats_updated
+                ON chats(updated_at DESC);
+
             CREATE TABLE IF NOT EXISTS post_files (
                 id TEXT PRIMARY KEY,
                 post_id TEXT NOT NULL,
@@ -331,6 +357,33 @@ def init_db() -> None:
             columns = {row["name"] for row in connection.execute(f"PRAGMA table_info({table})").fetchall()}
             if "parent_post_id" not in columns:
                 connection.execute(f"ALTER TABLE {table} ADD COLUMN parent_post_id TEXT")
+            if "chat_id" not in columns:
+                connection.execute(f"ALTER TABLE {table} ADD COLUMN chat_id TEXT")
+
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_requests_chat ON requests(chat_id)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_posts_chat ON posts(chat_id)")
+
+        old_posts = connection.execute(
+            "SELECT id, request_id, name, prompt, answer, created_at, parent_post_id FROM posts WHERE chat_id IS NULL"
+        ).fetchall()
+        for post in old_posts:
+            chat_id = generate_id()
+            connection.execute(
+                "INSERT INTO chats (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)",
+                (chat_id, post["name"], post["created_at"], post["created_at"])
+            )
+            connection.execute("UPDATE posts SET chat_id = ? WHERE id = ?", (chat_id, post["id"]))
+            if post["request_id"]:
+                connection.execute("UPDATE requests SET chat_id = ? WHERE id = ?", (chat_id, post["request_id"]))
+            connection.execute(
+                "INSERT INTO messages (id, chat_id, role, content, request_id, post_id, created_at) VALUES (?, ?, 'user', ?, ?, NULL, ?)",
+                (generate_id(), chat_id, post["prompt"], post["request_id"], post["created_at"])
+            )
+            connection.execute(
+                "INSERT INTO messages (id, chat_id, role, content, request_id, post_id, created_at) VALUES (?, ?, 'assistant', ?, ?, ?, ?)",
+                (generate_id(), chat_id, post["answer"], post["request_id"], post["id"], post["created_at"])
+            )
+
         connection.commit()
 
     finally:
@@ -1040,14 +1093,24 @@ async def process_request(
         files = [dict(row) for row in files_rows]
 
         parent_messages: list[dict[str, str]] = []
-        parent_post_id = request["parent_post_id"]
-        if parent_post_id:
-            connection = db()
-            try:
+        connection = db()
+        try:
+            if request["chat_id"]:
+                rows = connection.execute(
+                    "SELECT role, content FROM messages WHERE chat_id = ? ORDER BY created_at ASC",
+                    (request["chat_id"],)
+                ).fetchall()
+                for message in rows:
+                    if message["role"] in ("user", "assistant"):
+                        parent_messages.append({"role": message["role"], "content": message["content"]})
+            elif request["parent_post_id"]:
                 chain = []
-                current_id = parent_post_id
-                for _ in range(12):
-                    parent = connection.execute("SELECT id, parent_post_id, prompt, answer FROM posts WHERE id = ?", (current_id,)).fetchone()
+                current_id = request["parent_post_id"]
+                for _ in range(100):
+                    parent = connection.execute(
+                        "SELECT id, parent_post_id, prompt, answer FROM posts WHERE id = ?",
+                        (current_id,)
+                    ).fetchone()
                     if not parent:
                         break
                     chain.append(parent)
@@ -1057,8 +1120,8 @@ async def process_request(
                 for parent in reversed(chain):
                     parent_messages.append({"role": "user", "content": parent["prompt"]})
                     parent_messages.append({"role": "assistant", "content": parent["answer"]})
-            finally:
-                connection.close()
+        finally:
+            connection.close()
 
         result = await ask_ai(request["prompt"], files, parent_messages=parent_messages)
 
@@ -1088,9 +1151,10 @@ async def process_request(
                     likes,
                     views,
                     created_at,
-                    parent_post_id
+                    parent_post_id,
+                    chat_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?)
                 """,
                 (
                     post_id,
@@ -1101,7 +1165,8 @@ async def process_request(
                     result["answer"],
                     result["model"],
                     created_at,
-                    request["parent_post_id"]
+                    request["parent_post_id"],
+                    request["chat_id"]
                 )
             )
 
@@ -1131,6 +1196,27 @@ async def process_request(
                     post_id,
                     request_id
                 )
+            )
+
+            connection.execute(
+                """
+                INSERT INTO messages (
+                    id, chat_id, role, content, request_id, post_id, created_at
+                )
+                VALUES (?, ?, 'assistant', ?, ?, ?, ?)
+                """,
+                (
+                    generate_id(),
+                    request["chat_id"],
+                    result["answer"],
+                    request_id,
+                    post_id,
+                    created_at
+                )
+            )
+            connection.execute(
+                "UPDATE chats SET updated_at = ? WHERE id = ?",
+                (created_at, request["chat_id"])
             )
 
             connection.commit()
@@ -1400,6 +1486,7 @@ async def create_request(
     prompt: str = Form(""),
     files: list[UploadFile] = File(default=[]),
     parent_post_id: str = Form(""),
+    chat_id: str = Form(""),
     x_session_id: Optional[str] = Header(
         default=None
     )
@@ -1422,14 +1509,26 @@ async def create_request(
     )
 
     parent_post_id = clean_text(parent_post_id, 100)
-    if parent_post_id:
-        connection = db()
-        try:
-            parent_exists = connection.execute("SELECT id FROM posts WHERE id = ?", (parent_post_id,)).fetchone()
-        finally:
-            connection.close()
-        if not parent_exists:
-            raise HTTPException(status_code=400, detail="Исходный пост для продолжения не найден.")
+    chat_id = clean_text(chat_id, 100)
+
+    connection = db()
+    try:
+        if parent_post_id:
+            parent = connection.execute(
+                "SELECT id, chat_id FROM posts WHERE id = ?",
+                (parent_post_id,)
+            ).fetchone()
+            if not parent:
+                raise HTTPException(status_code=400, detail="Исходный пост для продолжения не найден.")
+            if not chat_id:
+                chat_id = parent["chat_id"] or ""
+
+        if chat_id:
+            exists = connection.execute("SELECT id FROM chats WHERE id = ?", (chat_id,)).fetchone()
+            if not exists:
+                raise HTTPException(status_code=400, detail="Чат не найден.")
+    finally:
+        connection.close()
 
     if not name:
         name = "Аноним"
@@ -1521,8 +1620,21 @@ async def create_request(
             pass
 
     # --------------------------------------------------------
-    # CREATE REQUEST
+    # CREATE CHAT + REQUEST
     # --------------------------------------------------------
+
+    if not chat_id:
+        chat_id = generate_id()
+        chat_created_at = now_iso()
+        connection = db()
+        try:
+            connection.execute(
+                "INSERT INTO chats (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)",
+                (chat_id, name, chat_created_at, chat_created_at)
+            )
+            connection.commit()
+        finally:
+            connection.close()
 
     request_id = generate_id()
 
@@ -1667,9 +1779,10 @@ async def create_request(
                 post_id,
                 created_at,
                 updated_at,
-                parent_post_id
+                parent_post_id,
+                chat_id
             )
-            VALUES (?, ?, ?, 'queued', NULL, NULL, ?, ?, ?)
+            VALUES (?, ?, ?, 'queued', NULL, NULL, ?, ?, ?, ?)
             """,
             (
                 request_id,
@@ -1677,7 +1790,8 @@ async def create_request(
                 prompt,
                 created_at,
                 created_at,
-                parent_post_id
+                parent_post_id,
+                chat_id
             )
         )
 
@@ -1701,6 +1815,22 @@ async def create_request(
             (
                 request_id,
                 session_id
+            )
+        )
+
+        connection.execute(
+            """
+            INSERT INTO messages (
+                id, chat_id, role, content, request_id, post_id, created_at
+            )
+            VALUES (?, ?, 'user', ?, ?, NULL, ?)
+            """,
+            (
+                generate_id(),
+                chat_id,
+                prompt,
+                request_id,
+                created_at
             )
         )
 
@@ -1875,6 +2005,7 @@ def serialize_post(
         "likes": row["likes"],
         "views": row["views"],
         "parent_post_id": row["parent_post_id"],
+        "chat_id": row["chat_id"],
         "created_at": row["created_at"],
         "files": files,
     }
@@ -2013,6 +2144,71 @@ async def get_posts(
             )
         }
 
+    finally:
+        connection.close()
+
+
+# ============================================================
+# CHATS
+# ============================================================
+
+@app.get("/api/chats/{chat_id}")
+async def get_chat(chat_id: str):
+    connection = db()
+    try:
+        chat = connection.execute("SELECT * FROM chats WHERE id = ?", (chat_id,)).fetchone()
+        if not chat:
+            raise HTTPException(status_code=404, detail="Чат не найден.")
+
+        rows = connection.execute(
+            """
+            SELECT m.*, p.title, p.name, p.answer, p.prompt, p.model,
+                   p.likes, p.views, p.parent_post_id
+            FROM messages m
+            LEFT JOIN posts p ON p.id = m.post_id
+            WHERE m.chat_id = ?
+            ORDER BY m.created_at ASC
+            """,
+            (chat_id,)
+        ).fetchall()
+
+        messages = []
+        for row in rows:
+            item = dict(row)
+            item["files"] = get_post_files(connection, row["post_id"]) if row["post_id"] else []
+            messages.append(item)
+
+        return {
+            "id": chat["id"],
+            "name": chat["name"],
+            "created_at": chat["created_at"],
+            "updated_at": chat["updated_at"],
+            "messages": messages
+        }
+    finally:
+        connection.close()
+
+
+@app.get("/api/chats")
+async def get_chats(x_session_id: Optional[str] = Header(default=None)):
+    session_id = get_session_id(x_session_id)
+    connection = db()
+    try:
+        rows = connection.execute(
+            """
+            SELECT c.id, c.name, c.created_at, c.updated_at,
+                   COUNT(DISTINCT m.id) AS message_count
+            FROM chats c
+            JOIN requests r ON r.chat_id = c.id
+            JOIN request_sessions rs ON rs.request_id = r.id
+            LEFT JOIN messages m ON m.chat_id = c.id
+            WHERE rs.session_id = ?
+            GROUP BY c.id
+            ORDER BY c.updated_at DESC
+            """,
+            (session_id,)
+        ).fetchall()
+        return {"chats": [dict(row) for row in rows]}
     finally:
         connection.close()
 
@@ -2460,6 +2656,14 @@ async def health():
             "SELECT COUNT(*) FROM requests"
         ).fetchone()[0]
 
+        chats = connection.execute(
+            "SELECT COUNT(*) FROM chats"
+        ).fetchone()[0]
+
+        messages = connection.execute(
+            "SELECT COUNT(*) FROM messages"
+        ).fetchone()[0]
+
     finally:
         connection.close()
 
@@ -2468,6 +2672,8 @@ async def health():
         "service": "chatstudio",
         "posts": posts,
         "requests": requests,
+        "chats": chats,
+        "messages": messages,
         "ai_providers": len(PROVIDERS)
     }
 
