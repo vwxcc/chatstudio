@@ -2739,11 +2739,13 @@ function getFilteredPosts() {
         posts.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
     } else if (state.sort === "old") {
         posts.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+    } else if (state.sort === "random") {
+        posts.sort(() => Math.random() - 0.5);
     } else {
         posts.sort((a, b) => {
             const score = post => {
                 const age = Math.max(0, (Date.now() - new Date(post.created_at || Date.now()).getTime()) / 86400000);
-                return Math.log1p(post.likes * 3 + post.views) * 2 + 1 / (1 + age) + Math.random() * 0.35;
+                return Math.log1p(post.likes * 3 + post.views) * 2 + 1 / (1 + age) + Math.random() * 0.9;
             };
             return score(b) - score(a);
         });
@@ -2763,7 +2765,7 @@ function renderFeed() {
         const tools = document.createElement("div");
         tools.id = "feedTools";
         tools.className = "feed-tools";
-        tools.innerHTML = '<select class="feed-sort" id="feedSort" aria-label="Сортировка"><option value="recommended">Рекомендации</option><option value="top">Популярные</option><option value="new">Новые</option><option value="old">Старые</option></select>';
+        tools.innerHTML = '<select class="feed-sort" id="feedSort" aria-label="Сортировка"><option value="recommended">Рекомендации</option><option value="top">Популярные</option><option value="new">Новые</option><option value="old">Старые</option><option value="random">Случайные</option></select>';
         header.parentNode.insertBefore(tools, feed);
         const select = document.getElementById("feedSort");
         select.value = state.sort;
@@ -3293,7 +3295,7 @@ function injectFrontendStyles() {
         ".continue-dialog-button:hover{background:var(--accent-hover)}" +
         ".context-badge{margin-top:8px;color:var(--muted);font-size:11px}" +
         ".post-bottom{flex-wrap:wrap}" +
-        "@media(max-width:700px){.feed-tools{width:100%}.feed-sort{width:100%}.continue-dialog-button{width:100%}}";
+        ".chat-turn{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow)}" + ".full-chat-history{display:flex;flex-direction:column;gap:14px;margin-top:18px}" + ".full-chat-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px}" + ".chat-turn-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}" + ".chat-turn-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px}" + ".chat-answer{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}" + ".chat-turn-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}" + "@media(max-width:700px){.feed-tools{width:100%}.feed-sort{width:100%}.continue-dialog-button{width:100%}.full-chat-head{align-items:stretch;flex-direction:column}.chat-turn-head{flex-direction:column}}";
     document.head.appendChild(style);
 }
 
@@ -3302,39 +3304,46 @@ function injectFrontendStyles() {
    FULL POST
    ============================================================ */
 
-function renderFullPost(post) {
-    const files = post.files || [];
-    const filesHtml = files.length ? `<div class="full-files"><div class="content-label">Файлы · ${files.length}</div><div class="full-file-grid">${files.map(renderFullFile).join("")}</div></div>` : "";
-    const liked = hasReacted(STORAGE.likedPrefix, post.id);
-    const disliked = hasReacted(STORAGE.dislikedPrefix, post.id);
-
-    fullPostContainer.innerHTML = `<article class="full-post">
-        <div class="full-post-meta">
-            <div class="full-author">
-                <div class="full-avatar">${escapeHtml(getInitial(post.author))}</div>
-                <div><div class="full-author-name">${escapeHtml(post.author)}</div><div class="full-date">${escapeHtml(formatDate(post.created_at))}</div></div>
-            </div>
-            <div class="full-model">Модель: ${escapeHtml(post.model)}</div>
-        </div>
-        <h1 class="full-title">${escapeHtml(post.title)}</h1>
-        ${post.parent_post_id ? '<div class="context-badge">Это продолжение предыдущего диалога</div>' : ""}
-        ${post.prompt ? `<div><div class="content-label">Запрос</div><div class="full-request">${escapeHtml(post.prompt)}</div></div>` : ""}
-        ${filesHtml}
-        ${post.answer ? `<div class="full-answer"><div class="content-label">Ответ ИИ</div><div class="answer-content">${renderAnswer(post.answer)}</div></div>` : ""}
-        <div class="full-post-footer" id="postReactions">
-            <button class="reaction-button ${liked ? "active" : ""}" id="likeButton" type="button">${liked ? "♥" : "♡"} <span id="likeCount">${post.likes}</span></button>
-            <button class="reaction-button ${disliked ? "active" : ""}" id="dislikeButton" type="button">👎</button>
-            <button class="continue-dialog-button" id="continueDialogButton" type="button">↩ Продолжить диалог</button>
-            <div class="view-stat">◉ ${post.views} просмотров</div>
-        </div>
-    </article>`;
-
-    document.getElementById("likeButton").addEventListener("click", () => likePost(post.id));
-    document.getElementById("dislikeButton").addEventListener("click", () => dislikePost(post.id));
-    document.getElementById("continueDialogButton").addEventListener("click", () => continueDialog(post.id));
-    typesetMath(fullPostContainer);
+async function loadChatChain(lastPost) {
+    const chain = [];
+    let current = normalizePost(lastPost);
+    const seen = new Set();
+    while (current && current.id != null && chain.length < 100) {
+        const key = String(current.id);
+        if (seen.has(key)) break;
+        seen.add(key);
+        chain.unshift(current);
+        if (!current.parent_post_id) break;
+        try {
+            const response = await fetch(API.post(current.parent_post_id), {method:"GET",headers:{"X-Session-ID":getSessionId()},cache:"no-store"});
+            const data = await parseResponse(response);
+            if (!response.ok) break;
+            current = normalizePost(data.post || data);
+        } catch { break; }
+    }
+    return chain;
 }
 
+function chatTurnHtml(post,index) {
+    const files=post.files||[];
+    const filesHtml=files.length ? "<div class=\"full-files\"><div class=\"content-label\">Файлы · "+files.length+"</div><div class=\"full-file-grid\">"+files.map(renderFullFile).join("")+"</div></div>" : "";
+    const liked=hasReacted(STORAGE.likedPrefix,post.id);
+    return "<article class=\"chat-turn\"><div class=\"chat-turn-head\"><div><div class=\"chat-turn-label\">Запрос "+(index+1)+"</div><div class=\"full-author-name\">"+escapeHtml(post.author)+"</div></div><div class=\"full-date\">"+escapeHtml(formatDate(post.created_at))+"</div></div>"+
+        (post.prompt ? "<div class=\"content-label\">Запрос</div><div class=\"full-request\">"+escapeHtml(post.prompt)+"</div>" : "")+filesHtml+
+        "<div class=\"chat-answer\"><div class=\"content-label\">Ответ ИИ · "+escapeHtml(post.model)+"</div><div class=\"answer-content\">"+renderAnswer(post.answer||"Ответ отсутствует.")+"</div></div>"+
+        "<div class=\"chat-turn-footer\"><button class=\"reaction-button "+(liked?"active":"")+"\" type=\"button\" data-chat-like=\""+escapeHtml(post.id)+"\">"+(liked?"♥":"♡")+" "+post.likes+"</button><button class=\"continue-dialog-button\" type=\"button\" data-chat-continue=\""+escapeHtml(post.id)+"\">↩ Продолжить отсюда</button></div></article>";
+}
+
+async function renderFullPost(post) {
+    const chain=await loadChatChain(post);
+    const root=chain[0]||post;
+    const current=chain[chain.length-1]||post;
+    fullPostContainer.innerHTML="<div class=\"full-chat\"><div class=\"full-chat-head\"><div><div class=\"context-badge\">Полный чат · "+chain.length+" "+pluralize(chain.length,"сообщение","сообщения","сообщений")+"</div><h1 class=\"full-title\">"+escapeHtml(root.title)+"</h1></div><button class=\"continue-dialog-button\" id=\"chatContinueTop\" type=\"button\">↩ Продолжить диалог</button></div><div class=\"full-chat-history\">"+chain.map(chatTurnHtml).join("")+"</div></div>";
+    fullPostContainer.querySelectorAll("[data-chat-like]").forEach(button=>button.addEventListener("click",()=>likePost(button.dataset.chatLike)));
+    fullPostContainer.querySelectorAll("[data-chat-continue]").forEach(button=>button.addEventListener("click",()=>continueDialog(button.dataset.chatContinue)));
+    document.getElementById("chatContinueTop").addEventListener("click",()=>continueDialog(current.id));
+    typesetMath(fullPostContainer);
+}
 
 function renderFullFile(file) {
 
