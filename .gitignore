@@ -1,0 +1,16 @@
+# Secrets
+backend/.env
+
+# Runtime data
+backend/data/
+backend/uploads/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local/editor
+.vscode/
+.idea/
+.DS_Store

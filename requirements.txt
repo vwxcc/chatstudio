@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+aiohttp
+python-dotenv
+python-multipart
+pypdf
+python-docx
+openpyxl
