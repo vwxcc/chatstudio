@@ -234,6 +234,73 @@ def init_db() -> None:
     try:
         connection.executescript(
             """
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                display_name TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user',
+                is_active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                last_login_at TEXT
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_users_email
+                ON users(email);
+
+            CREATE TABLE IF NOT EXISTS auth_sessions (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                token_hash TEXT NOT NULL UNIQUE,
+                created_at TEXT NOT NULL,
+                expires_at TEXT NOT NULL,
+                last_seen_at TEXT NOT NULL,
+                FOREIGN KEY(user_id)
+                    REFERENCES users(id)
+                    ON DELETE CASCADE
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_auth_sessions_user
+                ON auth_sessions(user_id);
+
+            CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires
+                ON auth_sessions(expires_at);
+
+            CREATE TABLE IF NOT EXISTS subscription_plans (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT NOT NULL DEFAULT '',
+                price_cents INTEGER NOT NULL DEFAULT 0,
+                duration_days INTEGER NOT NULL DEFAULT 30,
+                is_active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS user_subscriptions (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                plan_id TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                starts_at TEXT NOT NULL,
+                expires_at TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY(user_id)
+                    REFERENCES users(id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY(plan_id)
+                    REFERENCES subscription_plans(id)
+                    ON DELETE RESTRICT
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user
+                ON user_subscriptions(user_id);
+
+            CREATE INDEX IF NOT EXISTS idx_user_subscriptions_active
+                ON user_subscriptions(user_id, status, expires_at);
+
             CREATE TABLE IF NOT EXISTS requests (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -242,7 +309,12 @@ def init_db() -> None:
                 error TEXT,
                 post_id TEXT,
                 created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
+                updated_at TEXT NOT NULL,
+                user_id TEXT,
+                visibility TEXT NOT NULL DEFAULT 'private',
+                FOREIGN KEY(user_id)
+                    REFERENCES users(id)
+                    ON DELETE SET NULL
             );
 
             CREATE TABLE IF NOT EXISTS posts (
@@ -256,9 +328,14 @@ def init_db() -> None:
                 likes INTEGER NOT NULL DEFAULT 0,
                 views INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL,
+                user_id TEXT,
+                visibility TEXT NOT NULL DEFAULT 'private',
 
                 FOREIGN KEY(request_id)
                     REFERENCES requests(id)
+                    ON DELETE SET NULL,
+                FOREIGN KEY(user_id)
+                    REFERENCES users(id)
                     ON DELETE SET NULL
             );
 
@@ -289,7 +366,13 @@ def init_db() -> None:
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
                 created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
+                updated_at TEXT NOT NULL,
+                user_id TEXT,
+                visibility TEXT NOT NULL DEFAULT 'private',
+
+                FOREIGN KEY(user_id)
+                    REFERENCES users(id)
+                    ON DELETE CASCADE
             );
 
             CREATE TABLE IF NOT EXISTS messages (
@@ -359,12 +442,43 @@ def init_db() -> None:
                 connection.execute(f"ALTER TABLE {table} ADD COLUMN parent_post_id TEXT")
             if "chat_id" not in columns:
                 connection.execute(f"ALTER TABLE {table} ADD COLUMN chat_id TEXT")
+            if "user_id" not in columns:
+                connection.execute(f"ALTER TABLE {table} ADD COLUMN user_id TEXT")
+            if "visibility" not in columns:
+                connection.execute(
+                    f"ALTER TABLE {table} ADD COLUMN visibility TEXT NOT NULL DEFAULT 'private'"
+                )
+
+        chat_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(chats)").fetchall()
+        }
+        if "user_id" not in chat_columns:
+            connection.execute("ALTER TABLE chats ADD COLUMN user_id TEXT")
+        if "visibility" not in chat_columns:
+            connection.execute(
+                "ALTER TABLE chats ADD COLUMN visibility TEXT NOT NULL DEFAULT 'private'"
+            )
+
+        # Existing posts were already public in the old version.
+        # Keep them public so this migration does not hide existing content.
+        connection.execute(
+            "UPDATE posts SET visibility = 'public' "
+            "WHERE visibility IS NULL OR visibility = ''"
+        )
 
         connection.execute("CREATE INDEX IF NOT EXISTS idx_requests_chat ON requests(chat_id)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_requests_user ON requests(user_id)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_requests_visibility ON requests(visibility)")
         connection.execute("CREATE INDEX IF NOT EXISTS idx_posts_chat ON posts(chat_id)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_posts_user ON posts(user_id)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_posts_visibility ON posts(visibility)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_chats_user ON chats(user_id)")
+        connection.execute("CREATE INDEX IF NOT EXISTS idx_chats_visibility ON chats(visibility)")
 
         old_posts = connection.execute(
-            "SELECT id, request_id, name, prompt, answer, created_at, parent_post_id FROM posts WHERE chat_id IS NULL"
+            "SELECT id, request_id, name, prompt, answer, created_at, parent_post_id, user_id, visibility "
+            "FROM posts WHERE chat_id IS NULL"
         ).fetchall()
         for post in old_posts:
             chat_id = generate_id()
