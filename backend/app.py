@@ -16,7 +16,7 @@ from typing import Any, Optional
 
 import aiohttp
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, Header, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -1521,6 +1521,445 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ============================================================
+# AUTHENTICATION
+# ============================================================
+
+AUTH_SESSION_DAYS = max(
+    1,
+    int(os.getenv("AUTH_SESSION_DAYS", "30"))
+)
+
+AUTH_COOKIE_NAME = "chatstudio_session"
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    display_name: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+def normalize_email(email: str) -> str:
+    return email.strip().lower()
+
+
+def hash_password(password: str, salt: bytes | None = None) -> str:
+    if salt is None:
+        salt = secrets.token_bytes(16)
+
+    derived = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt,
+        260_000
+    )
+
+    return (
+        "pbkdf2_sha256$260000$"
+        + salt.hex()
+        + "$"
+        + derived.hex()
+    )
+
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    try:
+        algorithm, iterations, salt_hex, digest_hex = stored_hash.split("$", 3)
+
+        if algorithm != "pbkdf2_sha256":
+            return False
+
+        expected = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode("utf-8"),
+            bytes.fromhex(salt_hex),
+            int(iterations)
+        )
+
+        return secrets.compare_digest(
+            expected.hex(),
+            digest_hex
+        )
+
+    except (ValueError, TypeError):
+        return False
+
+
+def create_auth_session(
+    connection: sqlite3.Connection,
+    user_id: str
+) -> str:
+    raw_token = secrets.token_urlsafe(48)
+    token_hash = hashlib.sha256(
+        raw_token.encode("utf-8")
+    ).hexdigest()
+
+    created_at = datetime.now(timezone.utc)
+    expires_at = created_at.timestamp() + (
+        AUTH_SESSION_DAYS * 24 * 60 * 60
+    )
+
+    expires_iso = datetime.fromtimestamp(
+        expires_at,
+        timezone.utc
+    ).isoformat()
+
+    now = created_at.isoformat()
+
+    connection.execute(
+        """
+        INSERT INTO auth_sessions (
+            id,
+            user_id,
+            token_hash,
+            created_at,
+            expires_at,
+            last_seen_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            generate_id(),
+            user_id,
+            token_hash,
+            now,
+            expires_iso,
+            now
+        )
+    )
+
+    return raw_token
+
+
+def get_auth_token(
+    request: Request,
+    authorization: Optional[str] = None
+) -> Optional[str]:
+    cookie_token = request.cookies.get(
+        AUTH_COOKIE_NAME
+    )
+
+    if cookie_token:
+        return cookie_token
+
+    if authorization:
+        scheme, _, token = authorization.partition(" ")
+
+        if scheme.lower() == "bearer" and token:
+            return token.strip()
+
+    return None
+
+
+def get_current_user(
+    request: Request,
+    authorization: Optional[str] = None
+) -> Optional[sqlite3.Row]:
+    token = get_auth_token(
+        request,
+        authorization
+    )
+
+    if not token:
+        return None
+
+    token_hash = hashlib.sha256(
+        token.encode("utf-8")
+    ).hexdigest()
+
+    connection = db()
+
+    try:
+        row = connection.execute(
+            """
+            SELECT
+                u.id,
+                u.email,
+                u.display_name,
+                u.role,
+                u.is_active,
+                u.created_at,
+                u.updated_at,
+                u.last_login_at,
+                s.id AS session_id
+            FROM auth_sessions s
+            JOIN users u ON u.id = s.user_id
+            WHERE s.token_hash = ?
+              AND s.expires_at > ?
+              AND u.is_active = 1
+            """,
+            (
+                token_hash,
+                now_iso()
+            )
+        ).fetchone()
+
+        if row:
+            connection.execute(
+                """
+                UPDATE auth_sessions
+                SET last_seen_at = ?
+                WHERE id = ?
+                """,
+                (
+                    now_iso(),
+                    row["session_id"]
+                )
+            )
+            connection.commit()
+
+        return row
+
+    finally:
+        connection.close()
+
+
+@app.post("/api/auth/register")
+async def register(
+    data: RegisterRequest,
+    response: JSONResponse
+):
+    email = normalize_email(data.email)
+    display_name = clean_text(
+        data.display_name,
+        MAX_NAME_LENGTH
+    )
+    password = data.password
+
+    if not re.fullmatch(
+        r"[^@\s]+@[^@\s]+\.[^@\s]+",
+        email
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Введите корректный email."
+        )
+
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="Пароль должен содержать минимум 8 символов."
+        )
+
+    if not display_name:
+        raise HTTPException(
+            status_code=400,
+            detail="Введите имя."
+        )
+
+    connection = db()
+
+    try:
+        existing = connection.execute(
+            "SELECT id FROM users WHERE email = ?",
+            (email,)
+        ).fetchone()
+
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="Пользователь с таким email уже существует."
+            )
+
+        user_id = generate_id()
+        now = now_iso()
+
+        connection.execute(
+            """
+            INSERT INTO users (
+                id,
+                email,
+                password_hash,
+                display_name,
+                role,
+                is_active,
+                created_at,
+                updated_at
+            )
+            VALUES (?, ?, ?, ?, 'user', 1, ?, ?)
+            """,
+            (
+                user_id,
+                email,
+                hash_password(password),
+                display_name,
+                now,
+                now
+            )
+        )
+
+        token = create_auth_session(
+            connection,
+            user_id
+        )
+
+        connection.commit()
+
+    finally:
+        connection.close()
+
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=token,
+        max_age=AUTH_SESSION_DAYS * 24 * 60 * 60,
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        path="/"
+    )
+
+    return {
+        "ok": True,
+        "user": {
+            "id": user_id,
+            "email": email,
+            "display_name": display_name,
+            "role": "user"
+        }
+    }
+
+
+@app.post("/api/auth/login")
+async def login(
+    data: LoginRequest,
+    response: JSONResponse
+):
+    email = normalize_email(data.email)
+
+    connection = db()
+
+    try:
+        user = connection.execute(
+            """
+            SELECT *
+            FROM users
+            WHERE email = ?
+              AND is_active = 1
+            """,
+            (email,)
+        ).fetchone()
+
+        if not user or not verify_password(
+            data.password,
+            user["password_hash"]
+        ):
+            raise HTTPException(
+                status_code=401,
+                detail="Неверный email или пароль."
+            )
+
+        now = now_iso()
+
+        connection.execute(
+            """
+            UPDATE users
+            SET last_login_at = ?,
+                updated_at = ?
+            WHERE id = ?
+            """,
+            (
+                now,
+                now,
+                user["id"]
+            )
+        )
+
+        token = create_auth_session(
+            connection,
+            user["id"]
+        )
+
+        connection.commit()
+
+    finally:
+        connection.close()
+
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=token,
+        max_age=AUTH_SESSION_DAYS * 24 * 60 * 60,
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        path="/"
+    )
+
+    return {
+        "ok": True,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "display_name": user["display_name"],
+            "role": user["role"]
+        }
+    }
+
+
+@app.post("/api/auth/logout")
+async def logout(
+    request: Request,
+    response: JSONResponse
+):
+    token = request.cookies.get(
+        AUTH_COOKIE_NAME
+    )
+
+    if token:
+        token_hash = hashlib.sha256(
+            token.encode("utf-8")
+        ).hexdigest()
+
+        connection = db()
+
+        try:
+            connection.execute(
+                "DELETE FROM auth_sessions WHERE token_hash = ?",
+                (token_hash,)
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        path="/"
+    )
+
+    return {"ok": True}
+
+
+@app.get("/api/auth/me")
+async def me(
+    request: Request,
+    authorization: Optional[str] = Header(default=None)
+):
+    user = get_current_user(
+        request,
+        authorization
+    )
+
+    if not user:
+        return {
+            "authenticated": False,
+            "user": None
+        }
+
+    return {
+        "authenticated": True,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "display_name": user["display_name"],
+            "role": user["role"]
+        }
+    }
 
 
 # ============================================================
