@@ -309,11 +309,6 @@
                 if (body) body.innerHTML = '<div style="color:var(--danger);padding:30px;">' + esc(error.message) + '</div>';
             });
         }
-            const title = overlay.querySelector(".cs-private-title");
-            if (title) title.textContent = "Ошибка";
-            const body = overlay.querySelector(".cs-private-body");
-            if (body) body.innerHTML = '<div style="color:var(--danger);padding:30px;">' + esc(error.message) + '</div>';
-        });
     }
 
     window.ChatStudioOpenChat = function(chatId) {
@@ -321,12 +316,6 @@
         close();
         state.chatId = chatId;
         build(chatId);
-    };
-
-    window.ChatStudioNewPrivateChat = function() {
-        close();
-        state.chatId = null;
-        build(null);
     };
 
     window.ChatStudioNewPrivateChat = function() {
