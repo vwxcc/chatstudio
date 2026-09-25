@@ -2628,6 +2628,28 @@ def get_post_files(
     ]
 
 
+def get_request_files(
+    connection: sqlite3.Connection,
+    request_id: str
+) -> list[dict[str, Any]]:
+
+    rows = connection.execute(
+        """
+        SELECT *
+        FROM request_files
+        WHERE request_id = ?
+        ORDER BY created_at ASC
+        """,
+        (request_id,)
+    ).fetchall()
+
+    return [
+        serialize_file(row)
+        for row in rows
+    ]
+
+
+
 def serialize_post(
     connection: sqlite3.Connection,
     row: sqlite3.Row
@@ -2855,7 +2877,7 @@ async def get_chat(
         messages = []
         for row in rows:
             item = dict(row)
-            item["files"] = get_post_files(connection, row["post_id"]) if row["post_id"] else []
+            item["files"] = get_post_files(connection, row["post_id"]) if row["post_id"] else get_request_files(connection, row["request_id"]) if row["request_id"] else []
             messages.append(item)
 
         return {
