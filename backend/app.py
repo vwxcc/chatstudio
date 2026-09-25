@@ -16,7 +16,7 @@ from typing import Any, Optional
 
 import aiohttp
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, Header, HTTPException, Query, Request, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Query, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -1724,7 +1724,7 @@ def get_current_user(
 @app.post("/api/auth/register")
 async def register(
     data: RegisterRequest,
-    response: JSONResponse
+    response: Response
 ):
     email = normalize_email(data.email)
     display_name = clean_text(
@@ -1829,7 +1829,7 @@ async def register(
 @app.post("/api/auth/login")
 async def login(
     data: LoginRequest,
-    response: JSONResponse
+    response: Response
 ):
     email = normalize_email(data.email)
 
@@ -1905,7 +1905,7 @@ async def login(
 @app.post("/api/auth/logout")
 async def logout(
     request: Request,
-    response: JSONResponse
+    response: Response
 ):
     token = request.cookies.get(
         AUTH_COOKIE_NAME
