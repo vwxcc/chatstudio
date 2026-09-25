@@ -276,12 +276,24 @@
         if (action === "logout") logout();
     }
 
+    async function loadPrivateChat() {
+        if (window.ChatStudioOpenChat) return;
+        await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "/private-chat.js";
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
     async function init() {
         try {
             const data = await request(API.me);
             if (!data.authenticated || !data.user) return;
 
             state.user = data.user;
+            await loadPrivateChat();
             document.body.classList.add("chatstudio-authenticated");
             addStyles();
             createSidebar();
