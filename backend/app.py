@@ -2545,7 +2545,8 @@ async def get_request_status(
                 post_id,
                 created_at,
                 updated_at,
-                user_id
+                user_id,
+                chat_id
             FROM requests
             WHERE id = ?
             """,
