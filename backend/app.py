@@ -2363,7 +2363,8 @@ async def get_chats(x_session_id: Optional[str] = Header(default=None)):
     "/api/posts/{post_id}"
 )
 async def get_post(
-    post_id: str
+    post_id: str,
+    x_session_id: Optional[str] = Header(default=None)
 ):
 
     connection = db()
@@ -2384,6 +2385,24 @@ async def get_post(
                 status_code=404,
                 detail="Пост не найден."
             )
+
+        if row["visibility"] != "public":
+            session_id = get_session_id(x_session_id)
+            owned = connection.execute(
+                """
+                SELECT 1
+                FROM request_sessions
+                WHERE request_id = ?
+                  AND session_id = ?
+                """,
+                (row["request_id"], session_id)
+            ).fetchone()
+
+            if not owned:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Пост не найден."
+                )
 
         return serialize_post(
             connection,
