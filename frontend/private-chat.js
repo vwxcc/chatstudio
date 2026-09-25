@@ -198,6 +198,13 @@
         form.append("name", state.chat && state.chat.name ? state.chat.name : "Пользователь");
         form.append("prompt", prompt);
         form.append("chat_id", state.chatId);
+
+        const messages = state.chat && Array.isArray(state.chat.messages) ? state.chat.messages : [];
+        const lastAssistant = [...messages].reverse().find(message => message.role === "assistant" && message.post_id);
+        if (lastAssistant && lastAssistant.post_id) {
+            form.append("parent_post_id", lastAssistant.post_id);
+        }
+
         state.files.forEach(file => form.append("files", file, file.name));
 
         const statusBox = document.querySelector("#chatstudio-private-chat .cs-private-status");
