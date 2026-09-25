@@ -2144,6 +2144,7 @@ def serialize_post(
         "views": row["views"],
         "parent_post_id": row["parent_post_id"],
         "chat_id": row["chat_id"],
+        "visibility": row["visibility"],
         "created_at": row["created_at"],
         "files": files,
     }
@@ -2190,16 +2191,19 @@ async def get_posts(
 
         params: list[Any] = []
 
-        where = ""
+        where = """
+            WHERE visibility = 'public'
+        """
 
         if search:
 
-            where = """
-                WHERE
+            where += """
+                AND (
                     title LIKE ?
                     OR prompt LIKE ?
                     OR answer LIKE ?
                     OR name LIKE ?
+                )
             """
 
             term = (
