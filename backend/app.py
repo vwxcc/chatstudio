@@ -3062,72 +3062,104 @@ async def get_files(
     "/api/files/{file_id}"
 )
 async def download_file(
-    file_id: str
+    file_id: str,
+    request: Request,
+    x_session_id: Optional[str] = Header(default=None)
 ):
+    current_user = get_current_user(request)
+    session_id = get_session_id(x_session_id)
 
     connection = db()
 
     try:
-
         row = connection.execute(
             """
-            SELECT *
-            FROM post_files
-            WHERE id = ?
+            SELECT
+                pf.id,
+                pf.original_name,
+                pf.stored_name,
+                pf.mime_type,
+                p.visibility,
+                p.user_id,
+                p.request_id
+            FROM post_files pf
+            JOIN posts p ON p.id = pf.post_id
+            WHERE pf.id = ?
             """,
             (file_id,)
         ).fetchone()
 
-    finally:
-        connection.close()
+        source = "post"
 
-    if not row:
-        raise HTTPException(
-            status_code=404,
-            detail="Файл не найден."
-        )
-
-    path = Path(
-        UPLOAD_DIR
-        / "posts"
-        / row["stored_name"]
-    )
-
-    # На случай старой структуры.
-    if not path.exists():
-
-        request_file = db()
-
-        try:
-
-            old = request_file.execute(
+        if not row:
+            row = connection.execute(
                 """
-                SELECT path
-                FROM request_files
-                WHERE id = ?
+                SELECT
+                    rf.id,
+                    rf.original_name,
+                    rf.stored_name,
+                    rf.mime_type,
+                    r.user_id,
+                    r.visibility,
+                    r.id AS request_id,
+                    rf.path
+                FROM request_files rf
+                JOIN requests r ON r.id = rf.request_id
+                WHERE rf.id = ?
                 """,
                 (file_id,)
             ).fetchone()
+            source = "request"
 
-        finally:
-            request_file.close()
-
-        if old:
-            path = Path(
-                old["path"]
+        if not row:
+            raise HTTPException(
+                status_code=404,
+                detail="Файл не найден."
             )
 
-    if not path.exists():
-        raise HTTPException(
-            status_code=404,
-            detail="Файл отсутствует на диске."
-        )
+        if row["visibility"] != "public":
+            if current_user:
+                if row["user_id"] != current_user["id"]:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Файл не найден."
+                    )
+            else:
+                owned = connection.execute(
+                    """
+                    SELECT 1
+                    FROM request_sessions
+                    WHERE request_id = ?
+                      AND session_id = ?
+                    LIMIT 1
+                    """,
+                    (row["request_id"], session_id)
+                ).fetchone()
 
-    return FileResponse(
-        path,
-        media_type=row["mime_type"],
-        filename=row["original_name"]
-    )
+                if not owned:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Файл не найден."
+                    )
+
+        if source == "request":
+            path = Path(row["path"])
+        else:
+            path = Path(UPLOAD_DIR / "posts" / row["stored_name"])
+
+        if not path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="Файл отсутствует на диске."
+            )
+
+        return FileResponse(
+            path,
+            media_type=row["mime_type"],
+            filename=row["original_name"]
+        )
+    finally:
+        connection.close()
 
 
 # ============================================================
