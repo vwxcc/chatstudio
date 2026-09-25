@@ -2112,11 +2112,30 @@ async def create_request(
             if not exists:
                 raise HTTPException(status_code=400, detail="Чат не найден.")
 
-            if current_user_id and exists["user_id"] != current_user_id:
-                raise HTTPException(
-                    status_code=403,
-                    detail="Этот чат принадлежит другому пользователю."
-                )
+            if current_user_id:
+                if exists["user_id"] != current_user_id:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Этот чат принадлежит другому пользователю."
+                    )
+            else:
+                owned = connection.execute(
+                    """
+                    SELECT 1
+                    FROM requests r
+                    JOIN request_sessions rs ON rs.request_id = r.id
+                    WHERE r.chat_id = ?
+                      AND rs.session_id = ?
+                    LIMIT 1
+                    """,
+                    (chat_id, session_id)
+                ).fetchone()
+
+                if not owned:
+                    raise HTTPException(
+                        status_code=403,
+                        detail="Этот чат недоступен для текущей сессии."
+                    )
     finally:
         connection.close()
 
@@ -2505,8 +2524,13 @@ async def create_request(
     "/api/requests/{request_id}"
 )
 async def get_request_status(
-    request_id: str
+    request_id: str,
+    request: Request,
+    x_session_id: Optional[str] = Header(default=None)
 ):
+
+    current_user = get_current_user(request)
+    session_id = get_session_id(x_session_id)
 
     connection = db()
 
@@ -2520,7 +2544,8 @@ async def get_request_status(
                 error,
                 post_id,
                 created_at,
-                updated_at
+                updated_at,
+                user_id
             FROM requests
             WHERE id = ?
             """,
@@ -2536,9 +2561,27 @@ async def get_request_status(
             detail="Запрос не найден."
         )
 
-    return dict(
-        request
-    )
+    if current_user:
+        if request["user_id"] != current_user["id"]:
+            raise HTTPException(status_code=404, detail="Запрос не найден.")
+    else:
+        owned = connection.execute(
+            """
+            SELECT 1
+            FROM request_sessions
+            WHERE request_id = ?
+              AND session_id = ?
+            LIMIT 1
+            """,
+            (request_id, session_id)
+        ).fetchone()
+
+        if not owned:
+            raise HTTPException(status_code=404, detail="Запрос не найден.")
+
+    result = dict(request)
+    result.pop("user_id", None)
+    return result
 
 
 # ============================================================
