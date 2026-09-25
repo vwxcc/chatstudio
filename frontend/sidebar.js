@@ -276,6 +276,11 @@
         if (action === "logout") logout();
     }
 
+    window.ChatStudioRefreshChats = function() {
+        const input = document.querySelector(".cs-sidebar-search");
+        loadChats(input ? input.value.trim() : "");
+    };
+
     async function loadPrivateChat() {
         if (window.ChatStudioOpenChat) return;
         await new Promise((resolve, reject) => {
