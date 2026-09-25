@@ -2066,10 +2066,14 @@ async def create_request(
     chat_id: str = Form(""),
     x_session_id: Optional[str] = Header(
         default=None
-    )
+    ),
+    request: Request = None
 ):
 
     ensure_request_files_table()
+
+    current_user = get_current_user(request) if request else None
+    current_user_id = current_user["id"] if current_user else None
 
     session_id = get_session_id(
         x_session_id
@@ -2101,9 +2105,18 @@ async def create_request(
                 chat_id = parent["chat_id"] or ""
 
         if chat_id:
-            exists = connection.execute("SELECT id FROM chats WHERE id = ?", (chat_id,)).fetchone()
+            exists = connection.execute(
+                "SELECT id, user_id FROM chats WHERE id = ?",
+                (chat_id,)
+            ).fetchone()
             if not exists:
                 raise HTTPException(status_code=400, detail="Чат не найден.")
+
+            if current_user_id and exists["user_id"] != current_user_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Этот чат принадлежит другому пользователю."
+                )
     finally:
         connection.close()
 
@@ -2206,8 +2219,19 @@ async def create_request(
         connection = db()
         try:
             connection.execute(
-                "INSERT INTO chats (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)",
-                (chat_id, name, chat_created_at, chat_created_at)
+                """
+                INSERT INTO chats (
+                    id, name, created_at, updated_at, user_id, visibility
+                )
+                VALUES (?, ?, ?, ?, ?, 'private')
+                """,
+                (
+                    chat_id,
+                    name,
+                    chat_created_at,
+                    chat_created_at,
+                    current_user_id
+                )
             )
             connection.commit()
         finally:
@@ -2357,9 +2381,11 @@ async def create_request(
                 created_at,
                 updated_at,
                 parent_post_id,
-                chat_id
+                chat_id,
+                user_id,
+                visibility
             )
-            VALUES (?, ?, ?, 'queued', NULL, NULL, ?, ?, ?, ?)
+            VALUES (?, ?, ?, 'queued', NULL, NULL, ?, ?, ?, ?, ?, 'private')
             """,
             (
                 request_id,
@@ -2368,7 +2394,8 @@ async def create_request(
                 created_at,
                 created_at,
                 parent_post_id,
-                chat_id
+                chat_id,
+                current_user_id
             )
         )
 
