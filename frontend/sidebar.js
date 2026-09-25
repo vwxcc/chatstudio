@@ -113,8 +113,12 @@
         toggle.addEventListener("click", () => sidebar.classList.toggle("cs-open"));
 
         sidebar.querySelector(".cs-new-chat").addEventListener("click", () => {
-            const button = document.querySelector(".new-button");
-            if (button) button.click();
+            if (window.ChatStudioNewPrivateChat) {
+                window.ChatStudioNewPrivateChat();
+            } else {
+                const button = document.getElementById("headerNewButton") || document.getElementById("heroNewButton");
+                if (button) button.click();
+            }
             sidebar.classList.remove("cs-open");
         });
 
@@ -198,6 +202,13 @@
     }
 
     async function openChat(chatId) {
+        if (window.ChatStudioOpenChat) {
+            window.ChatStudioOpenChat(chatId);
+            const sidebar = document.getElementById("chatstudio-sidebar");
+            if (sidebar) sidebar.classList.remove("cs-open");
+            return;
+        }
+
         try {
             const chat = await request("/api/chats/" + encodeURIComponent(chatId));
             const messages = Array.isArray(chat.messages) ? chat.messages : [];
