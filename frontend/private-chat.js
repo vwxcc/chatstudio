@@ -167,7 +167,7 @@
             if (!response.ok) throw new Error(data.detail || data.message || "Не удалось проверить запрос.");
 
             const postId = extractPostId(data);
-            if (postId) return postId;
+            if (postId) return data;
 
             const status = String(data.status || "").toLowerCase();
             if (status === "error" || status === "failed") {
@@ -184,7 +184,7 @@
     }
 
     async function send() {
-        if (state.busy || !state.chatId) return;
+        if (state.busy) return;
 
         const input = document.querySelector("#chatstudio-private-chat .cs-private-input");
         const sendButton = document.querySelector("#chatstudio-private-chat .cs-private-send");
@@ -197,7 +197,9 @@
         const form = new FormData();
         form.append("name", state.chat && state.chat.name ? state.chat.name : "Пользователь");
         form.append("prompt", prompt);
-        form.append("chat_id", state.chatId);
+        if (state.chatId) {
+            form.append("chat_id", state.chatId);
+        }
 
         const messages = state.chat && Array.isArray(state.chat.messages) ? state.chat.messages : [];
         const lastAssistant = [...messages].reverse().find(message => message.role === "assistant" && message.post_id);
@@ -225,9 +227,19 @@
             renderFiles();
 
             let postId = extractPostId(data);
-            if (!postId && data.request_id != null) postId = await poll(data.request_id);
+            let statusData = null;
+            if (!postId && data.request_id != null) {
+                statusData = await poll(data.request_id);
+            }
 
-            await loadChat(state.chatId);
+            if (!state.chatId && statusData && statusData.chat_id) {
+                state.chatId = statusData.chat_id;
+            }
+
+            if (state.chatId) {
+                await loadChat(state.chatId);
+                if (window.ChatStudioRefreshChats) window.ChatStudioRefreshChats();
+            }
             if (statusBox) statusBox.textContent = "";
         } catch (error) {
             if (statusBox) statusBox.textContent = error.message || "Не удалось отправить сообщение.";
@@ -267,7 +279,7 @@
         document.body.appendChild(overlay);
         document.body.style.overflow = "hidden";
 
-        overlay.querySelector(".cs-private-title").textContent = "Загрузка чата…";
+        overlay.querySelector(".cs-private-title").textContent = chatId ? "Загрузка чата…" : "Новый чат";
         overlay.querySelector(".cs-private-back").addEventListener("click", close);
         overlay.querySelector(".cs-private-close").addEventListener("click", close);
         overlay.querySelector(".cs-private-send").addEventListener("click", send);
@@ -286,10 +298,17 @@
             renderFiles();
         });
 
-        loadChat(chatId).then(() => {
-            const title = overlay.querySelector(".cs-private-title");
-            if (title) title.textContent = state.chat.name || "Приватный чат";
-        }).catch(error => {
+        if (chatId) {
+            loadChat(chatId).then(() => {
+                const title = overlay.querySelector(".cs-private-title");
+                if (title) title.textContent = state.chat.name || "Приватный чат";
+            }).catch(error => {
+                const title = overlay.querySelector(".cs-private-title");
+                if (title) title.textContent = "Ошибка";
+                const body = overlay.querySelector(".cs-private-body");
+                if (body) body.innerHTML = '<div style="color:var(--danger);padding:30px;">' + esc(error.message) + '</div>';
+            });
+        }
             const title = overlay.querySelector(".cs-private-title");
             if (title) title.textContent = "Ошибка";
             const body = overlay.querySelector(".cs-private-body");
@@ -306,7 +325,13 @@
 
     window.ChatStudioNewPrivateChat = function() {
         close();
-        const button = document.getElementById("headerNewButton") || document.getElementById("heroNewButton");
-        if (button) button.click();
+        state.chatId = null;
+        build(null);
+    };
+
+    window.ChatStudioNewPrivateChat = function() {
+        close();
+        state.chatId = null;
+        build(null);
     };
 })();
