@@ -2958,6 +2958,106 @@ async def get_post(
 # FILE DOWNLOAD
 # ============================================================
 
+@app.get("/api/files")
+async def get_files(
+    request: Request,
+    search: str = Query("", max_length=MAX_SEARCH_LENGTH),
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100)
+):
+    current_user = get_current_user(request)
+
+    if not current_user:
+        raise HTTPException(
+            status_code=401,
+            detail="Войдите в аккаунт, чтобы открыть библиотеку файлов."
+        )
+
+    search = clean_text(search, MAX_SEARCH_LENGTH)
+    offset = (page - 1) * limit
+    term = "%" + search + "%"
+
+    connection = db()
+    try:
+        rows = connection.execute(
+            """
+            SELECT
+                rf.id,
+                rf.original_name,
+                rf.stored_name,
+                rf.mime_type,
+                rf.size_bytes,
+                rf.path,
+                rf.created_at,
+                r.id AS request_id,
+                r.chat_id,
+                r.user_id,
+                p.id AS post_id
+            FROM request_files rf
+            JOIN requests r ON r.id = rf.request_id
+            LEFT JOIN posts p ON p.request_id = r.id
+            WHERE r.user_id = ?
+              AND (
+                    ? = ''
+                    OR rf.original_name LIKE ?
+                    OR rf.mime_type LIKE ?
+              )
+            ORDER BY rf.created_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (
+                current_user["id"],
+                search,
+                term,
+                term,
+                limit,
+                offset
+            )
+        ).fetchall()
+
+        total = connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM request_files rf
+            JOIN requests r ON r.id = rf.request_id
+            WHERE r.user_id = ?
+              AND (
+                    ? = ''
+                    OR rf.original_name LIKE ?
+                    OR rf.mime_type LIKE ?
+              )
+            """,
+            (
+                current_user["id"],
+                search,
+                term,
+                term
+            )
+        ).fetchone()[0]
+
+        files = []
+        for row in rows:
+            item = serialize_file(row)
+            item.update({
+                "request_id": row["request_id"],
+                "chat_id": row["chat_id"],
+                "post_id": row["post_id"],
+                "created_at": row["created_at"],
+            })
+            files.append(item)
+
+        return {
+            "files": files,
+            "search": search,
+            "page": page,
+            "limit": limit,
+            "total": total,
+            "has_more": offset + len(files) < total
+        }
+    finally:
+        connection.close()
+
+
 @app.get(
     "/api/files/{file_id}"
 )
