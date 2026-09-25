@@ -476,6 +476,26 @@ def init_db() -> None:
         connection.execute("CREATE INDEX IF NOT EXISTS idx_chats_user ON chats(user_id)")
         connection.execute("CREATE INDEX IF NOT EXISTS idx_chats_visibility ON chats(visibility)")
 
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS app_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """
+        )
+        migrated = connection.execute(
+            "SELECT value FROM app_meta WHERE key = 'privacy_schema_v2'"
+        ).fetchone()
+        if not migrated:
+            connection.execute("UPDATE posts SET visibility = 'public'")
+            connection.execute(
+                """
+                INSERT INTO app_meta (key, value)
+                VALUES ('privacy_schema_v2', '1')
+                """
+            )
+
         old_posts = connection.execute(
             "SELECT id, request_id, name, prompt, answer, created_at, parent_post_id, user_id, visibility "
             "FROM posts WHERE chat_id IS NULL"
