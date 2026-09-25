@@ -2761,12 +2761,41 @@ async def get_posts(
 # ============================================================
 
 @app.get("/api/chats/{chat_id}")
-async def get_chat(chat_id: str):
+async def get_chat(
+    chat_id: str,
+    request: Request,
+    x_session_id: Optional[str] = Header(default=None)
+):
+    current_user = get_current_user(request)
+    session_id = get_session_id(x_session_id)
+
     connection = db()
     try:
-        chat = connection.execute("SELECT * FROM chats WHERE id = ?", (chat_id,)).fetchone()
+        chat = connection.execute(
+            "SELECT * FROM chats WHERE id = ?",
+            (chat_id,)
+        ).fetchone()
         if not chat:
             raise HTTPException(status_code=404, detail="Чат не найден.")
+
+        if current_user:
+            if chat["user_id"] != current_user["id"]:
+                raise HTTPException(status_code=404, detail="Чат не найден.")
+        else:
+            owned = connection.execute(
+                """
+                SELECT 1
+                FROM requests r
+                JOIN request_sessions rs ON rs.request_id = r.id
+                WHERE r.chat_id = ?
+                  AND rs.session_id = ?
+                LIMIT 1
+                """,
+                (chat_id, session_id)
+            ).fetchone()
+
+            if not owned:
+                raise HTTPException(status_code=404, detail="Чат не найден.")
 
         rows = connection.execute(
             """
@@ -2798,25 +2827,71 @@ async def get_chat(chat_id: str):
 
 
 @app.get("/api/chats")
-async def get_chats(x_session_id: Optional[str] = Header(default=None)):
+async def get_chats(
+    request: Request,
+    x_session_id: Optional[str] = Header(default=None),
+    search: str = Query("", max_length=MAX_SEARCH_LENGTH)
+):
+    current_user = get_current_user(request)
     session_id = get_session_id(x_session_id)
+    search = clean_text(search, MAX_SEARCH_LENGTH)
+
     connection = db()
     try:
-        rows = connection.execute(
+        params: list[Any] = []
+        where = ""
+
+        if current_user:
+            where = "WHERE c.user_id = ?"
+            params.append(current_user["id"])
+        else:
+            where = """
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM requests r2
+                    JOIN request_sessions rs2 ON rs2.request_id = r2.id
+                    WHERE r2.chat_id = c.id
+                      AND rs2.session_id = ?
+                )
             """
-            SELECT c.id, c.name, c.created_at, c.updated_at,
-                   COUNT(DISTINCT m.id) AS message_count
+            params.append(session_id)
+
+        if search:
+            where += """
+                AND (
+                    c.name LIKE ?
+                    OR EXISTS (
+                        SELECT 1
+                        FROM messages sm
+                        WHERE sm.chat_id = c.id
+                          AND sm.content LIKE ?
+                    )
+                )
+            """
+            term = "%" + search + "%"
+            params.extend([term, term])
+
+        rows = connection.execute(
+            f"""
+            SELECT
+                c.id,
+                c.name,
+                c.created_at,
+                c.updated_at,
+                COUNT(DISTINCT m.id) AS message_count
             FROM chats c
-            JOIN requests r ON r.chat_id = c.id
-            JOIN request_sessions rs ON rs.request_id = r.id
             LEFT JOIN messages m ON m.chat_id = c.id
-            WHERE rs.session_id = ?
+            {where}
             GROUP BY c.id
             ORDER BY c.updated_at DESC
             """,
-            (session_id,)
+            tuple(params)
         ).fetchall()
-        return {"chats": [dict(row) for row in rows]}
+
+        return {
+            "chats": [dict(row) for row in rows],
+            "search": search
+        }
     finally:
         connection.close()
 
