@@ -1286,9 +1286,11 @@ async def process_request(
                     views,
                     created_at,
                     parent_post_id,
-                    chat_id
+                    chat_id,
+                    user_id,
+                    visibility
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?, ?, ?)
                 """,
                 (
                     post_id,
@@ -1300,7 +1302,9 @@ async def process_request(
                     result["model"],
                     created_at,
                     request["parent_post_id"],
-                    request["chat_id"]
+                    request["chat_id"],
+                    request["user_id"],
+                    request["visibility"]
                 )
             )
 
