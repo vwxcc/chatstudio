@@ -1580,10 +1580,418 @@
                     repeat(2, minmax(0, 1fr));
             }
         }
-    </style>
+    
+/* ============================================================
+   AUTH SIDEBAR
+============================================================ */
+
+.auth-sidebar-toggle {
+    position: fixed;
+    left: 16px;
+    top: 86px;
+    z-index: 180;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255,253,249,.92);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    display: none;
+    place-items: center;
+    font-size: 18px;
+    backdrop-filter: blur(12px);
+}
+
+.auth-sidebar-toggle.visible {
+    display: grid;
+}
+
+.auth-sidebar {
+    position: fixed;
+    left: 14px;
+    top: 84px;
+    bottom: 14px;
+    width: 292px;
+    z-index: 170;
+    display: none;
+    flex-direction: column;
+    background: rgba(255,253,249,.96);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 18px 55px rgba(54,47,38,.14);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+}
+
+.auth-sidebar.visible {
+    display: flex;
+}
+
+.sidebar-head {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-new {
+    width: 100%;
+    min-height: 43px;
+    border: 0;
+    border-radius: 11px;
+    background: var(--accent);
+    color: white;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.sidebar-new:hover {
+    background: var(--accent-hover);
+}
+
+.sidebar-search {
+    width: 100%;
+    height: 39px;
+    margin-top: 10px;
+    padding: 0 11px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    background: var(--card-soft);
+    color: var(--text);
+    font-size: 12px;
+}
+
+.sidebar-search:focus {
+    background: var(--card);
+    border-color: var(--border-dark);
+}
+
+.sidebar-section-title {
+    padding: 12px 15px 7px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.sidebar-chats {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 8px 10px;
+}
+
+.sidebar-chat {
+    width: 100%;
+    display: block;
+    padding: 10px 9px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.sidebar-chat:hover {
+    background: var(--bg-soft);
+}
+
+.sidebar-chat-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-chat-date {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.sidebar-empty {
+    padding: 14px 10px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.sidebar-footer {
+    border-top: 1px solid var(--border);
+    padding: 8px;
+}
+
+.sidebar-action {
+    width: 100%;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-soft);
+    text-align: left;
+    font-size: 12px;
+}
+
+.sidebar-action:hover {
+    background: var(--bg-soft);
+    color: var(--text);
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px 5px;
+    color: var(--text-soft);
+    font-size: 11px;
+}
+
+.sidebar-user-avatar {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #e8e1d8;
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.sidebar-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(37,35,31,.28);
+    backdrop-filter: blur(5px);
+}
+
+.sidebar-modal.visible {
+    display: flex;
+}
+
+.sidebar-modal-card {
+    width: min(680px, 100%);
+    max-height: min(760px, 90vh);
+    overflow: auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 25px 80px rgba(40,35,29,.2);
+}
+
+.sidebar-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 17px 19px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-modal-head h2 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.sidebar-modal-close {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--card-soft);
+    color: var(--text);
+}
+
+.sidebar-modal-body {
+    padding: 19px;
+}
+
+.sidebar-chat-message {
+    padding: 12px 13px;
+    margin-bottom: 9px;
+    border-radius: 12px;
+    background: var(--card-soft);
+    white-space: pre-wrap;
+    line-height: 1.55;
+    font-size: 13px;
+}
+
+.sidebar-chat-message.user {
+    background: #eee9e1;
+}
+
+.sidebar-chat-role {
+    margin-bottom: 5px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.sidebar-file-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-file-row:last-child {
+    border-bottom: 0;
+}
+
+.sidebar-file-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    background: var(--bg-soft);
+    font-size: 12px;
+}
+
+.sidebar-file-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.sidebar-file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sidebar-file-meta {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.sidebar-account-line {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-account-label {
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.sidebar-account-value {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.sidebar-danger {
+    margin-top: 15px;
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #e7c4c0;
+    border-radius: 10px;
+    background: var(--danger-bg);
+    color: #873f39;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+@media (max-width: 760px) {
+    .auth-sidebar {
+        left: 8px;
+        top: 78px;
+        bottom: 8px;
+        width: min(292px, calc(100vw - 16px));
+    }
+
+    .auth-sidebar-toggle {
+        left: 10px;
+        top: 78px;
+    }
+
+    .app {
+        width: min(1120px, calc(100% - 20px));
+    }
+}
+
+</style>
 </head>
 
 <body>
+
+<!-- AUTHENTICATED SIDEBAR -->
+<button
+    class="auth-sidebar-toggle"
+    id="authSidebarToggle"
+    type="button"
+    aria-label="Открыть меню"
+    title="Меню"
+>☰</button>
+
+<aside class="auth-sidebar" id="authSidebar" aria-label="Навигация аккаунта">
+    <div class="sidebar-head">
+        <button class="sidebar-new" id="sidebarNewChat" type="button">
+            + Новый чат
+        </button>
+
+        <input
+            class="sidebar-search"
+            id="sidebarChatSearch"
+            type="search"
+            placeholder="Поиск по приватным чатам…"
+            autocomplete="off"
+        >
+    </div>
+
+    <div class="sidebar-section-title">История</div>
+
+    <div class="sidebar-chats" id="sidebarChats">
+        <div class="sidebar-empty">Загрузка чатов…</div>
+    </div>
+
+    <div class="sidebar-footer">
+        <button class="sidebar-action" id="sidebarFiles" type="button">
+            <span>📁</span><span>Файлы</span>
+        </button>
+        <button class="sidebar-action" id="sidebarAccount" type="button">
+            <span>👤</span><span>Аккаунт</span>
+        </button>
+        <button class="sidebar-action" id="sidebarSettings" type="button">
+            <span>⚙</span><span>Настройки</span>
+        </button>
+
+        <div class="sidebar-user" id="sidebarUser">
+            <div class="sidebar-user-avatar" id="sidebarUserAvatar">?</div>
+            <div id="sidebarUserName">Аккаунт</div>
+        </div>
+    </div>
+</aside>
+
+<div class="sidebar-modal" id="sidebarModal">
+    <div class="sidebar-modal-card" role="dialog" aria-modal="true">
+        <div class="sidebar-modal-head">
+            <h2 id="sidebarModalTitle">ChatStudio</h2>
+            <button class="sidebar-modal-close" id="sidebarModalClose" type="button">×</button>
+        </div>
+        <div class="sidebar-modal-body" id="sidebarModalBody"></div>
+    </div>
+</div>
+
 
 <header class="topbar">
 
@@ -5283,6 +5691,322 @@ const originalOpenPost =
 /* ============================================================
    END
    ============================================================ */
+
+/* ============================================================
+   AUTHENTICATED SIDEBAR
+============================================================ */
+
+const sidebarState = {
+    user: null,
+    chats: [],
+    searchTimer: null
+};
+
+function sidebarInitials(name) {
+    const value = String(name || "?").trim();
+    if (!value) return "?";
+    return value
+        .split(/\\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0])
+        .join("")
+        .toUpperCase();
+}
+
+function sidebarEscape(value) {
+    const div = document.createElement("div");
+    div.textContent = String(value ?? "");
+    return div.innerHTML;
+}
+
+function sidebarFormatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+}
+
+async function sidebarParse(response) {
+    const type = response.headers.get("content-type") || "";
+    if (type.includes("application/json")) {
+        return await response.json();
+    }
+    const text = await response.text();
+    try {
+        return JSON.parse(text);
+    } catch {
+        return { message: text };
+    }
+}
+
+function sidebarShowModal(title, bodyHtml) {
+    document.getElementById("sidebarModalTitle").textContent = title;
+    document.getElementById("sidebarModalBody").innerHTML = bodyHtml;
+    document.getElementById("sidebarModal").classList.add("visible");
+}
+
+function sidebarCloseModal() {
+    document.getElementById("sidebarModal").classList.remove("visible");
+}
+
+function sidebarRenderChats(chats) {
+    const box = document.getElementById("sidebarChats");
+
+    if (!chats.length) {
+        box.innerHTML = '<div class="sidebar-empty">Приватных чатов пока нет.</div>';
+        return;
+    }
+
+    box.innerHTML = chats.map(chat => {
+        const name = chat.name || "Новый чат";
+        return `
+            <button class="sidebar-chat" type="button" data-chat-id="${sidebarEscape(chat.id)}">
+                <div class="sidebar-chat-name">${sidebarEscape(name)}</div>
+                <div class="sidebar-chat-date">
+                    ${sidebarEscape(sidebarFormatDate(chat.updated_at || chat.created_at))}
+                    · ${Number(chat.message_count || 0)} сообщ.
+                </div>
+            </button>
+        `;
+    }).join("");
+
+    box.querySelectorAll("[data-chat-id]").forEach(button => {
+        button.addEventListener("click", () => {
+            sidebarOpenChat(button.dataset.chatId);
+        });
+    });
+}
+
+async function sidebarLoadChats(search = "") {
+    const box = document.getElementById("sidebarChats");
+
+    if (!sidebarState.user) return;
+
+    box.innerHTML = '<div class="sidebar-empty">Загрузка чатов…</div>';
+
+    try {
+        const url = new URL("/api/chats", window.location.origin);
+        if (search.trim()) {
+            url.searchParams.set("search", search.trim());
+        }
+
+        const response = await fetch(url, {
+            method: "GET",
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+
+        const data = await sidebarParse(response);
+
+        if (!response.ok) {
+            throw new Error(data.message || data.error || "Не удалось загрузить историю.");
+        }
+
+        sidebarState.chats = Array.isArray(data.chats) ? data.chats : [];
+        sidebarRenderChats(sidebarState.chats);
+    } catch (error) {
+        box.innerHTML = `<div class="sidebar-empty">${sidebarEscape(error.message || "Не удалось загрузить историю.")}</div>`;
+    }
+}
+
+async function sidebarOpenChat(chatId) {
+    try {
+        const response = await fetch(
+            `/api/chats/${encodeURIComponent(chatId)}`,
+            {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store"
+            }
+        );
+
+        const data = await sidebarParse(response);
+
+        if (!response.ok) {
+            throw new Error(data.message || data.error || "Не удалось открыть чат.");
+        }
+
+        const messages = Array.isArray(data.messages) ? data.messages : [];
+
+        const body = messages.length
+            ? messages.map(message => `
+                <div class="sidebar-chat-message ${message.role === "user" ? "user" : ""}">
+                    <div class="sidebar-chat-role">${sidebarEscape(message.role === "user" ? "Вы" : "ИИ")}</div>
+                    ${sidebarEscape(message.content || "")}
+                </div>
+            `).join("")
+            : '<div class="sidebar-empty">В этом чате пока нет сообщений.</div>';
+
+        sidebarShowModal(
+            data.name || "Приватный чат",
+            body
+        );
+    } catch (error) {
+        sidebarShowModal(
+            "Ошибка",
+            `<div class="sidebar-empty">${sidebarEscape(error.message || "Не удалось открыть чат.")}</div>`
+        );
+    }
+}
+
+async function sidebarOpenFiles() {
+    try {
+        const response = await fetch(
+            "/api/files?limit=100",
+            {
+                method: "GET",
+                credentials: "same-origin",
+                cache: "no-store"
+            }
+        );
+
+        const data = await sidebarParse(response);
+
+        if (!response.ok) {
+            throw new Error(data.message || data.error || "Не удалось загрузить библиотеку файлов.");
+        }
+
+        const files = Array.isArray(data.files) ? data.files : [];
+
+        const body = files.length
+            ? files.map(file => `
+                <div class="sidebar-file-row">
+                    <div class="sidebar-file-icon">${sidebarEscape((file.mime_type || "FILE").split("/").pop().slice(0, 5).toUpperCase())}</div>
+                    <div class="sidebar-file-info">
+                        <div class="sidebar-file-name">${sidebarEscape(file.original_name || file.name || "Файл")}</div>
+                        <div class="sidebar-file-meta">${sidebarEscape(file.mime_type || "Файл")} · ${sidebarEscape(file.size_bytes ? Math.round(file.size_bytes / 1024) + " КБ" : "размер неизвестен")}</div>
+                    </div>
+                    <a href="${sidebarEscape(file.url || "#")}" target="_blank" rel="noopener" class="header-button" style="height:32px;padding:0 9px;text-decoration:none;display:flex;align-items:center">Открыть</a>
+                </div>
+            `).join("")
+            : '<div class="sidebar-empty">Загруженных файлов пока нет.</div>';
+
+        sidebarShowModal("Библиотека файлов", body);
+    } catch (error) {
+        sidebarShowModal(
+            "Файлы",
+            `<div class="sidebar-empty">${sidebarEscape(error.message || "Не удалось загрузить файлы.")}</div>`
+        );
+    }
+}
+
+function sidebarOpenAccount() {
+    if (!sidebarState.user) return;
+
+    const user = sidebarState.user;
+
+    sidebarShowModal(
+        "Аккаунт",
+        `
+            <div class="sidebar-account-line">
+                <div class="sidebar-account-label">Имя</div>
+                <div class="sidebar-account-value">${sidebarEscape(user.display_name || "—")}</div>
+            </div>
+            <div class="sidebar-account-line">
+                <div class="sidebar-account-label">Email</div>
+                <div class="sidebar-account-value">${sidebarEscape(user.email || "—")}</div>
+            </div>
+            <div class="sidebar-account-line">
+                <div class="sidebar-account-label">Роль</div>
+                <div class="sidebar-account-value">${sidebarEscape(user.role || "user")}</div>
+            </div>
+            <button class="sidebar-danger" id="sidebarLogout" type="button">Выйти из аккаунта</button>
+        `
+    );
+
+    document.getElementById("sidebarLogout").addEventListener("click", sidebarLogout);
+}
+
+function sidebarOpenSettings() {
+    sidebarShowModal(
+        "Настройки",
+        `
+            <div class="sidebar-empty">
+                Основные настройки ChatStudio подключим следующим этапом.
+                <br><br>
+                Уже доступна настройка приватной истории через текущую учётную запись.
+            </div>
+        `
+    );
+}
+
+async function sidebarLogout() {
+    try {
+        await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "same-origin"
+        });
+    } finally {
+        window.location.reload();
+    }
+}
+
+async function sidebarInit() {
+    const sidebar = document.getElementById("authSidebar");
+    const toggle = document.getElementById("authSidebarToggle");
+
+    try {
+        const response = await fetch("/api/auth/me", {
+            method: "GET",
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+
+        const data = await sidebarParse(response);
+
+        if (!data.authenticated || !data.user) {
+            return;
+        }
+
+        sidebarState.user = data.user;
+        sidebar.classList.add("visible");
+        toggle.classList.add("visible");
+
+        document.getElementById("sidebarUserName").textContent =
+            data.user.display_name || data.user.email || "Аккаунт";
+
+        document.getElementById("sidebarUserAvatar").textContent =
+            sidebarInitials(data.user.display_name || data.user.email);
+
+        await sidebarLoadChats();
+
+        document.getElementById("sidebarNewChat").addEventListener("click", () => {
+            resetNewRequest();
+            showView("new");
+            sidebar.classList.remove("visible");
+        });
+
+        document.getElementById("sidebarFiles").addEventListener("click", sidebarOpenFiles);
+        document.getElementById("sidebarAccount").addEventListener("click", sidebarOpenAccount);
+        document.getElementById("sidebarSettings").addEventListener("click", sidebarOpenSettings);
+
+        toggle.addEventListener("click", () => {
+            sidebar.classList.toggle("visible");
+        });
+
+        document.getElementById("sidebarChatSearch").addEventListener("input", event => {
+            clearTimeout(sidebarState.searchTimer);
+            const value = event.target.value;
+            sidebarState.searchTimer = setTimeout(() => sidebarLoadChats(value), 250);
+        });
+
+        document.getElementById("sidebarModalClose").addEventListener("click", sidebarCloseModal);
+        document.getElementById("sidebarModal").addEventListener("click", event => {
+            if (event.target.id === "sidebarModal") sidebarCloseModal();
+        });
+    } catch {
+        /* Sidebar is optional for anonymous/temporarily unavailable auth. */
+    }
+}
+
+
+sidebarInit();
+
 </script>
 
 </body>
